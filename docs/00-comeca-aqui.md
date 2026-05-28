@@ -453,5 +453,237 @@ foi resolvida antes — seja pela equipe, seja pela literatura de transporte de 
 
 ---
 
+---
+
+## 13. Resumo Visual — Como Funciona Hoje e Onde Está o Problema
+
+Esta seção fecha o documento amarrando tudo num único quadro mental. Se você lembrar só
+desta parte, já consegue acompanhar as discussões técnicas.
+
+### 13.1 Os atores
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                          O SISTEMA                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  MFSim (CFD)                          RTS (radiação)            │
+│  ───────────                          ────────────              │
+│  • Já paralelo (MPI)                  • Serial (1 core só)      │
+│  • Domínio dividido entre N ranks     • Recebe tudo de uma vez  │
+│  • Malha adaptativa (AMR)             • Malha uniforme          │
+│  • Calcula fluido, temperatura        • Calcula radiação        │
+│  • Roda continuamente                 • Chamado de N em N passos│
+│                                                                 │
+│        └─────── conversam via ───────┘                          │
+│                                                                 │
+│        rad_core.f90 / RTS_connection.f90 / rad_interface.f90    │
+│        (camada de cola dentro do MFSim)                         │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 13.2 Como funciona hoje (timeline)
+
+```mermaid
+gantt
+    title Timeline de uma execução típica do MFSim com RTS
+    dateFormat X
+    axisFormat %s
+
+    section Rank 0
+    MFSim paralelo            :active, r0a, 0, 10
+    Coleta dados (REDUCE)     :crit, r0b, 10, 12
+    RTS solver (SOZINHO)      :crit, r0c, 12, 30
+    Envia resultado (BCAST)   :crit, r0d, 30, 32
+    MFSim paralelo            :active, r0e, 32, 42
+
+    section Rank 1
+    MFSim paralelo            :active, r1a, 0, 10
+    Manda dados ao root       :crit, r1b, 10, 12
+    OCIOSO esperando          :done, r1c, 12, 30
+    Recebe resultado          :crit, r1d, 30, 32
+    MFSim paralelo            :active, r1e, 32, 42
+
+    section Rank 2
+    MFSim paralelo            :active, r2a, 0, 10
+    Manda dados ao root       :crit, r2b, 10, 12
+    OCIOSO esperando          :done, r2c, 12, 30
+    Recebe resultado          :crit, r2d, 30, 32
+    MFSim paralelo            :active, r2e, 32, 42
+
+    section Rank N
+    MFSim paralelo            :active, rNa, 0, 10
+    Manda dados ao root       :crit, rNb, 10, 12
+    OCIOSO esperando          :done, rNc, 12, 30
+    Recebe resultado          :crit, rNd, 30, 32
+    MFSim paralelo            :active, rNe, 32, 42
+```
+
+> **Leia o gráfico assim:**
+> - 🟢 **Verde** = trabalho útil (todo mundo trabalhando)
+> - 🟡 **Amarelo** = comunicação (cara, mas necessária)
+> - ⚫ **Cinza/branco** = OCIOSO — cores parados esperando o Rank 0 terminar
+>
+> Repare que durante o RTS solver (o bloco mais longo), **só o Rank 0 está trabalhando**.
+> Em um cluster de 128 cores, 127 ficam parados.
+
+### 13.3 Visão espacial do problema
+
+```
+ETAPA 1: MFSim rodando (todos trabalham em paralelo) ✅
+
+  Domínio físico (ex.: câmara de combustão 3D)
+  ┌───────┬───────┬───────┬───────┐
+  │ R0 🔥 │ R1 🔥 │ R2 🔥 │ R3 🔥 │  ← cada rank tem sua fatia
+  ├───────┼───────┼───────┼───────┤     e calcula o fluido nela
+  │ R4 🔥 │ R5 🔥 │ R6 🔥 │ R7 🔥 │
+  └───────┴───────┴───────┴───────┘
+  Tempo: rápido (paralelo)
+
+
+ETAPA 2: hora da radiação → manda tudo pro Rank 0 😰
+
+  ┌───────┐                ┌───────────────────────────────┐
+  │ R0 🔥 │ ──┐            │                               │
+  ├───────┤   │            │       DOMÍNIO INTEIRO         │
+  │ R1 🔥 │ ──┼──REDUCE──> │       reconstruído            │
+  ├───────┤   │            │       no Rank 0               │
+  │  ...  │ ──┘            │                               │
+  └───────┘                └───────────────────────────────┘
+  Rank 1..N: agora OCIOSOS 😴
+
+
+ETAPA 3: Rank 0 sozinho resolve RTS 🐢
+
+  ┌────────────────────────────────────────────────┐
+  │                                                │
+  │  Rank 0 executa:                               │
+  │    - WSGG (5 bandas)                           │
+  │    - DOM ou FAM (8 octantes × ~128 direções)   │
+  │    - Sweeps espaciais sequenciais              │
+  │    - Iterações até convergir                   │
+  │                                                │
+  │  Aloca IG(nxi,nyi,nzi,nt,np) — pode dar 90 GB! │
+  │                                                │
+  │  Outros ranks: 😴 😴 😴 😴 😴 😴 😴             │
+  │                                                │
+  └────────────────────────────────────────────────┘
+  Tempo: LENTO (serial)
+
+
+ETAPA 4: manda resultado pra todo mundo (BCAST)
+
+  ┌───────────────────────────────┐
+  │                               │ ──┐
+  │       S_rad, G, Q_radw        │   │              ┌───────┐
+  │       no Rank 0               │ ──┼──BCAST────> │ R0..N │
+  │                               │   │              └───────┘
+  └───────────────────────────────┘ ──┘
+
+ETAPA 5: volta ao MFSim em paralelo (volta ao normal) ✅
+```
+
+### 13.4 Onde exatamente está o problema (mapa)
+
+```mermaid
+flowchart TB
+    Start([Iteração do MFSim]) --> MFSim[Cálculo fluido em paralelo<br/>✅ N ranks trabalhando]
+    MFSim --> Decision{Hora da<br/>radiação?}
+    Decision -->|não| Start
+    Decision -->|sim| Reduce[MPI_REDUCE<br/>Junta dados no Rank 0]
+
+    Reduce --> Bottleneck
+
+    subgraph Bottleneck["🔴 GARGALO — só Rank 0"]
+        direction TB
+        B1[radiative_properties<br/>WSGG]
+        B2[BAND_LOOP<br/>5 iterações]
+        B3[RHS_SM_DOM/FAM<br/>O N³ × ângulos²]
+        B4[orthogonal_loop / agular_loop<br/>8 octantes × sweeps]
+        B5[SOR<br/>se P1]
+        B1 --> B2 --> B3 --> B4 --> B5
+    end
+
+    Bottleneck --> Bcast[MPI_BCAST × 3<br/>S_rad, G, Q_radw]
+    Bcast --> Interp[Cada rank interpola<br/>resultado para sua fatia ✅]
+    Interp --> Start
+
+    style Bottleneck fill:#ffcccc,stroke:#cc0000,stroke-width:3px
+    style MFSim fill:#ccffcc
+    style Interp fill:#ccffcc
+```
+
+### 13.5 Os 3 problemas concretos, lado a lado
+
+| Problema | Onde acontece | Sintoma observável | Quem sofre |
+|----------|---------------|--------------------|-----------| 
+| 🐢 **Tempo** | `rtesolve` no Rank 0 | Simulação demora horas/dias | Pesquisador |
+| 💾 **Memória** | `allocate(IG)` em TODO rank | RAM estoura em casos grandes (até 90 GB) | Sistema |
+| 📉 **Não escala** | `rtesolve` é serial | Adicionar mais cores não acelera | Cluster ocioso |
+
+### 13.6 Como queremos que fique (objetivo)
+
+```mermaid
+gantt
+    title Timeline DEPOIS da paralelização (objetivo)
+    dateFormat X
+    axisFormat %s
+
+    section Rank 0
+    MFSim paralelo            :active, r0a, 0, 10
+    Halo exchange             :crit, r0b, 10, 11
+    RTS sweep no SEU pedaço   :active, r0c, 11, 18
+    Halo exchange             :crit, r0d, 18, 19
+    MFSim paralelo            :active, r0e, 19, 29
+
+    section Rank 1
+    MFSim paralelo            :active, r1a, 0, 10
+    Halo exchange             :crit, r1b, 10, 11
+    RTS sweep no SEU pedaço   :active, r1c, 11, 18
+    Halo exchange             :crit, r1d, 18, 19
+    MFSim paralelo            :active, r1e, 19, 29
+
+    section Rank 2
+    MFSim paralelo            :active, r2a, 0, 10
+    Halo exchange             :crit, r2b, 10, 11
+    RTS sweep no SEU pedaço   :active, r2c, 11, 18
+    Halo exchange             :crit, r2d, 18, 19
+    MFSim paralelo            :active, r2e, 19, 29
+
+    section Rank N
+    MFSim paralelo            :active, rNa, 0, 10
+    Halo exchange             :crit, rNb, 10, 11
+    RTS sweep no SEU pedaço   :active, rNc, 11, 18
+    Halo exchange             :crit, rNd, 18, 19
+    MFSim paralelo            :active, rNe, 19, 29
+```
+
+> 🟢 **Sem cinza/ocioso!** Todos os ranks trabalham o tempo todo, inclusive durante o RTS.
+> A comunicação (amarelo) vira **troca de bordas com vizinhos** (cheap) em vez de
+> reunir tudo no Rank 0 (caro).
+
+### 13.7 Comparativo HOJE vs FUTURO
+
+| Aspecto | Hoje | Objetivo |
+|---------|------|----------|
+| Quem roda RTS | Só Rank 0 | Todos os ranks |
+| Dados de entrada | `MPI_REDUCE` (gigante) | Já estão locais |
+| Dados de saída | `MPI_BCAST` × 3 (gigante) | Já ficam locais |
+| Comunicação RTS | Nenhuma (mas centralizada) | Halo com vizinhos (pequena) |
+| Memória `IG` por rank | Domínio inteiro (~90 GB) | Só sua fatia (~1 GB) |
+| Tempo do RTS | Não escala | Escala com cores |
+| Mudanças no código | (nenhuma) | Refatorar sweeps + halo + ALLREDUCE no resíduo |
+
+### 13.8 TL;DR em três frases
+
+1. **Hoje:** MFSim é paralelo, mas quando precisa de radiação **para tudo e manda 1 core
+   resolver sozinho** o domínio inteiro.
+2. **Problema:** esse 1 core é o **gargalo** (tempo + memória + não escala).
+3. **Solução:** fazer o RTS também ser paralelo — cada core resolve a radiação da **sua
+   fatia espacial**, igualzinho o MFSim já faz com o fluido.
+
+---
+
 *Documento escrito como onboarding para alguém com forte background em programação mas
 zero familiaridade com radiação térmica, CFD ou o ecossistema MFSim.*
