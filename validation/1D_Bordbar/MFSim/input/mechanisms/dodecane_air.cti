@@ -1,0 +1,50 @@
+"""
+Comprehensive chemical kinetic modeling of the oxidation of 2-methylalkanes from C7 to C20 - Combustion and Flame 2011
+"""
+
+ideal_gas(name = "air",
+      elements = " N  H C ",
+      species = """ N2 NC12H26 """,
+      reactions = "all",
+      transport = "Mix",
+      initial_state = state(temperature = 300.0,
+                            pressure = OneAtm))
+
+#-------------------------------------------------------------------------------
+# Species data
+#-------------------------------------------------------------------------------
+
+species(name=u'N2',
+        atoms='N:2',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.29867700E+00,  1.40824000E-03, -3.96322200E-06,
+                       5.64151500E-09, -2.44485500E-12, -1.02090000E+03,
+                       3.95037200E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 2.92664000E+00,  1.48797700E-03, -5.68476100E-07,
+                       1.00970400E-10, -6.75335100E-15, -9.22797700E+02,
+                       5.98052800E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.621,
+                                well_depth=97.53,
+                                polar=1.76,
+                                rot_relax=4.0),
+        note=u'121286')
+
+
+species(name=u'NC12H26',
+        atoms='C:12 H:26',
+        thermo=(NASA([300.00, 1391.00],
+                     [-2.62181594E+00,  1.47237711E-01, -9.43970271E-05,
+                       3.07441268E-08, -4.03602230E-12, -4.00654253E+04,
+                       5.00994626E+01]),
+                NASA([1391.00, 5000.00],
+                     [ 3.85095037E+01,  5.63550048E-02, -1.91493200E-05,
+                       2.96024862E-09, -1.71244150E-13, -5.48843465E+04,
+                      -1.72670922E+02])),
+        transport=gas_transport(geom='nonlinear',
+                                diam=7.06,
+                                well_depth=789.16,
+                                polar=22.75,
+                                rot_relax=1.0),
+        note=u'4/24/7therm')

@@ -1,0 +1,64 @@
+!! probesSTL input file. Readed in start_probes_data subroutine
+
+!!!!*****Probe Files and Parameters****!!!
+.false.                     !use_probes_lag:                use stl probes
+1                           !Probe_Interp:                  Polynomial order for interpolation: 1-Linear, 2-Quadratic, 3-Cubic
+2                           !probe_interval_by:             1 - timestep, 2 - time
+1                           !probe_interval:                Frequency in time steps to probe variables 
+2d-4                         !probe_interval_time:           Frequency in time to probe variables 
+2                           !probe_file_mode:               1 - ASCII, 2 - Binary
+2 					        !probe_n_files:                 Number of files of stl probes (repeat save format and path for each file)
+
+1                           !probe_file(1)%save_type:       Save format (1-file_by_point ; 2-file_by_t)
+"test.dat"                  !probe_file(1)%path:            path and name of stl probes files
+
+1                           !probe_file(1)%save_type:       Save format (1-file_by_point ; 2-file_by_t)
+"test2.dat"                  !probe_file(1)%path:            path and name of stl probes files
+
+!!!!*****Probe Variables****!!!
+.true.                      !probe_file(1)%mask(1):         Save iteration (ct - ct_out_ctl)
+.true.                      !probe_file(1)%mask(2):         Save time(t - t_out_ctl)
+.true.                      !probe_file(1)%mask(3):         Save time step (dt - dt_out_ctl)
+.true.                      !probe_file(1)%mask(4):         Save x position (xc - xc_out_ctl)
+.true.                      !probe_file(1)%mask(5):         Save y position(yc - yc_out_ctl)
+.true.                      !probe_file(1)%mask(6):         Save z position(zc - zc_out_ctl)
+.true.                      !probe_file(1)%mask(7):         Save velocity u (u - u_out_ctl)
+.true.                      !probe_file(1)%mask(8):         Save velocity v (v - v_out_ctl)
+.true.                      !probe_file(1)%mask(9):         Save velocity w (w - w_out_ctl)
+.false.                     !probe_file(1)%mask(10):        Save pressure (P - P_out_ctl)
+.false.                     !probe_file(1)%mask(11):        Save scalar (sca - sca_out_ctl)
+.false.                     !probe_file(1)%mask(12):        Save density (rho - rho_out_ctl)
+.true.                      !probe_file(1)%mask(13):        Save viscosity (mu - mu_out_ctl)
+.true.                      !probe_file(1)%mask(14):        Save temperature (temperature - temp_out_ctl)
+.false.                     !probe_file(1)%mask(15):        Save turbulence variable 1 (tur1 - tur1_out_ctl)
+.false.                     !probe_file(1)%mask(16):        Save turbulence variable 2 (tur2 - tur2_out_ctl)
+.false.                     !probe_file(1)%mask(17):        Save particles number (dpm_npart - dpm_npart_out_ctl)
+.false.                     !probe_file(1)%mask(18):        Save particle diameter (dpm_diam_part - dpm_diam_part_out_ctl)
+.false.                     !probe_file(1)%mask(19):        Save particle mass (dpm_mass_part - dpm_mass_part_out_ctl)
+.false.                     !probe_file(1)%mask(20):        Save particle velocity u (dpm_upart - dpm_upart_out_ctl)
+.false.                     !probe_file(1)%mask(21):        Save particle velocity v (dpm_vpart - dpm_vpart_out_ctl)
+.false.                     !probe_file(1)%mask(22):        Save particle velocity w (dpm_wpart - dpm_wpart_out_ctl)
+.false.                     !probe_file(1)%mask(23):        Save dpm velocity fluctuation u' (dpm_ufluct - dpm_ufluct_out_ctl)
+.false.                     !probe_file(1)%mask(24):        Save dpm velocity fluctuation v' (dpm_vfluct - dpm_vfluct_out_ctl)
+.false.                     !probe_file(1)%mask(25):        Save dpm velocity fluctuation w' (dpm_wfluct - dpm_wfluct_out_ctl)
+.false.                     !probe_file(1)%mask(26):        Save particle temperature (dpm_temp_part - dpm_temp_part_out_ctl)
+.false.                     !probe_file(1)%mask(27):        Save volfrac (Volume fraction VoF - volfrac_out_ctl)
+
+!!!!***** Concentrations ****!!!
+.false. CH4         !Save indicated species wdot (wdot_out)
+.false. CH4         !Save indicated species mass fraction (y1_out)
+.false. O2          !Save indicated species mass fraction (y2_out)
+.false. N2          !Save indicated species mass fraction (y3_out)
+.false. OH          !Save indicated species mass fraction (y4_out)
+.false. CO2         !Save indicated species mass fraction (y5_out)
+.false. CO          !Save indicated species mass fraction (y6_out)
+.false. H2O         !Save indicated species mass fraction (y7_out)
+.false. H2          !Save indicated species mass fraction (y8_out)
+.false. H           !Save indicated species mass fraction (y9_out)
+.false. O           !Save indicated species mass fraction (y10_out)
+.false. HO2         !Save indicated species mass fraction (y11_out)
+.false. H2O2        !Save indicated species mass fraction (y12_out)
+.false. HCO         !Save indicated species mass fraction (y13_out)
+.false. CH2O        !Save indicated species mass fraction (y14_out)
+.false. CH3         !Save indicated species mass fraction (y15_out)
+.false. CH3O        !Save indicated species mass fraction (y16_out)

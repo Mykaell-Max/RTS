@@ -1,8 +1,0 @@
-Setup for the test case presented in Bordbar et al.(2020) article.
-
-For more details see "An extended weighted-sum-of-gray-gases 
-model to account for all CO2‐H2O molar fraction ratios in 
-thermal radiation".
-doi: https://doi.org/10.1016/j.icheatmasstransfer.2019.104400
-
-Replace the functions present in RTS_functions.f90 with those present in user_functions.f90

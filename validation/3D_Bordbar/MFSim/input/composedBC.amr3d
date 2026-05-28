@@ -1,0 +1,124 @@
+!! composedBC input file. Readed in amr3d_composed_readbc subroutine
+
+.false.                                 !composed_bc:                                                   composed boundary condition
+!BOUNDARY CONDITION FOR AN ESPCIFIC REGION
+!WEST FACE 
+0                                       !bcm(1)%nofsr:                                                  NUMBER OF SPECIFIC REGIONS AT WEST FACE
+2                                       !bcm(1)%kindsr:                                                 KIND= SAQUARE (1) OR CIRCLE (2) OR STL FILE (3)
+0.2d0 0.0d0 0.25d0 0.25d0               !bcm(1)%(radio,center1,center2,center3):                        (SQUARE: XI, XN, YI, YN, ZI, ZN; CIRCLE: RAIO, XC, YC, ZC; STL_FILE:path and name of stl files)
+0                                       !bcm(1)%noisekind:                                              0 - none , 1 - white noise, 2 - smirnov noise
+1.0 0.0 0.0                             !bcm(1)%(noisePercentageU,noisePercentageV,noisePercentageW):   noise percentagen at u, v, w
+1.0 0.0 0.0                             !bcm(1)%abg[(1,pres,l),(2,pres,l),(3,pres,l)]:                  ALFA BETA GAMMA FOR PRESSURE
+1.0 0.0 0.0                             !bcm(1)%abg[(1,velu,l),(2,velu,l),(3,velu,l)]:                  ALFA BETA GAMMA FOR U VELOCITY
+1.0 0.0 0.0                             !bcm(1)%abg[(1,velv,l),(2,velv,l),(3,velv,l)]:                  ALFA BETA GAMMA FOR V VELOCITY
+1.0 0.0 0.0                             !bcm(1)%abg[(1,velw,l),(2,velw,l),(3,velw,l)]:                  ALFA BETA GAMMA FOR W VELOCITY
+1.0 0.0 0.0                             !bcm(1)%abg[(1,vof,l),(2,vof,l),(3,vof,l)]:                     ALFA BETA GAMMA FOR VOF
+1.0 0.0 0.0                             !bcm(1)%abg[(1,sca,l),(2,sca,l),(3,sca,l)]:                     ALFA BETA GAMMA FOR SCALAR
+1.0 0.0 0.0                             !bcm(1)%abg[(1,vari,l),(2,vari,l),(3,vari,l)]:                  ALFA BETA GAMMA FOR VARIANCE
+1.0 0.0 0.0                             !bcm(1)%abg[(1,e_temp,l),(2,e_temp,l),(3,e_temp,l)]:            ALFA BETA GAMMA FOR TEMPERATURE
+1.0 0.0 0.0                             !bcm(1)%abg[(1,e_h,l),(2,e_h,l),(3,e_h,l)]:                     ALFA BETA GAMMA FOR Enthalpy
+1.0 0.0 0.0                             !bcm(1)%abg[(1,tur1,l),(2,tur1,l),(3,tur1,l)]:                  ALFA BETA GAMMA FOR TURBULENCE EQUATION 1
+1.0 0.0 0.0                             !bcm(1)%abg[(1,tur2,l),(2,tur2,l),(3,tur2,l)]:                  ALFA BETA GAMMA FOR TURBULENCE EQUATION 2
+1.0 0.0 0.0                             !bcm(1)%abg[(1,mass_frac,l),(2,mass_frac,l),(3,mass_frac,l)]:   ALFA BETA GAMMA FOR MASS FRAC
+0.0 1.0 0.0                             !bcm(1)%abg[(1,dens,l),(2,dens,l),(3,dens,l)]:                  ALFA BETA GAMMA FOR DENSITY
+
+!EAST FACE 
+0                                       !bcm(2)%nofsr:                                                  NUMBER OF SPECIFIC REGIONS AT EAST FACE
+2                                       !bcm(2)%kindsr:                                                 KIND= SAQUARE (1) OR CIRCLE (2) OR STL FILE (3)
+0.0381d0 1.024d0 3.1142d0 0.128d0       !bcm(2)%(radio,center1,center2,center3): (                      SQUARE: XI, XN, YI, YN, ZI, ZN; CIRCLE: RAIO, XC, YC, ZC; STL_FILE:path and name of stl files)
+0                                       !bcm(2)%noisekind:                                              0 - none , 1 - white noise, 2 - smirnov noise
+1.0 0.0 0.0                             !bcm(2)%(noisePercentageU,noisePercentageV,noisePercentageW):   noise percentagen at u, v, w
+1.0 0.0 0.0                             !bcm(2)%abg[(1,pres,l),(2,pres,l),(3,pres,l)]:                  ALFA BETA GAMMA FOR PRESSURE
+1.0 0.0 0.0                             !bcm(2)%abg[(1,velu,l),(2,velu,l),(3,velu,l)]:                  ALFA BETA GAMMA FOR U VELOCITY
+1.0 0.0 0.0                             !bcm(2)%abg[(1,velv,l),(2,velv,l),(3,velv,l)]:                  ALFA BETA GAMMA FOR V VELOCITY
+1.0 0.0 0.0                             !bcm(2)%abg[(1,velw,l),(2,velw,l),(3,velw,l)]:                  ALFA BETA GAMMA FOR W VELOCITY
+1.0 0.0 0.0                             !bcm(2)%abg[(1,vof,l),(2,vof,l),(3,vof,l)]:                     ALFA BETA GAMMA FOR VOF
+1.0 0.0 0.0                             !bcm(2)%abg[(1,sca,l),(2,sca,l),(3,sca,l)]:                     ALFA BETA GAMMA FOR SCALAR
+1.0 0.0 0.0                             !bcm(2)%abg[(1,vari,l),(2,vari,l),(3,vari,l)]:                  ALFA BETA GAMMA FOR VARIANCE
+1.0 0.0 0.0                             !bcm(2)%abg[(1,e_temp,l),(2,e_temp,l),(3,e_temp,l)]:            ALFA BETA GAMMA FOR TEMPERATURE
+1.0 0.0 0.0                             !bcm(2)%abg[(1,e_h,l),(2,e_h,l),(3,e_h,l)]:                     ALFA BETA GAMMA FOR Enthalpy
+1.0 0.0 0.0                             !bcm(2)%abg[(1,tur1,l),(2,tur1,l),(3,tur1,l)]:                  ALFA BETA GAMMA FOR TURBULENCE EQUATION 1
+1.0 0.0 0.0                             !bcm(2)%abg[(1,tur2,l),(2,tur2,l),(3,tur2,l)]:                  ALFA BETA GAMMA FOR TURBULENCE EQUATION 2
+1.0 0.0 0.0                             !bcm(2)%abg[(1,mass_frac,l),(2,mass_frac,l),(3,mass_frac,l)]:   ALFA BETA GAMMA FOR MASS FRAC
+0.0 1.0 0.0                             !bcm(2)%abg[(1,dens,l),(2,dens,l),(3,dens,l)]:                  ALFA BETA GAMMA FOR DENSITY
+
+!SOUTH FACE 
+0                                       !bcm(3)%nofsr:                                                  NUMBER OF SPECIFIC REGIONS AT SOUTH FACE
+2                                       !bcm(3)%kindsr:                                                 KIND= SQUARE (1) OR CIRCLE(2)
+0.0381 0.1861d0 1.28d0  0.128d0         !bcm(3)%(radio,center1,center2,center3):                        (SQUARE: XI, XN, YI, YN, ZI, ZN ; CIRCLE: RAIO, XC, YC, ZC; STL_FILE:path and name of stl files)
+0                                       !bcm(3)%noisekind:                                              0 - none , 1 - white noise, 2 - smirnov noise
+1.0 0.0 0.0                             !bcm(3)%(noisePercentageU,noisePercentageV,noisePercentageW):   noise percentagen at u, v, w
+1.0 0.0 0.0                             !bcm(3)%abg[(1,pres,l),(2,pres,l),(3,pres,l)]:                  ALFA BETA GAMMA FOR PRESSURE
+1.0 0.0 0.0                             !bcm(3)%abg[(1,velu,l),(2,velu,l),(3,velu,l)]:                  ALFA BETA GAMMA FOR U VELOCITY
+1.0 0.0 0.0                             !bcm(3)%abg[(1,velv,l),(2,velv,l),(3,velv,l)]:                  ALFA BETA GAMMA FOR V VELOCITY
+1.0 0.0 0.0                             !bcm(3)%abg[(1,velw,l),(2,velw,l),(3,velw,l)]:                  ALFA BETA GAMMA FOR W VELOCITY
+1.0 0.0 0.0                             !bcm(3)%abg[(1,vof,l),(2,vof,l),(3,vof,l)]:                     ALFA BETA GAMMA FOR VOF
+1.0 0.0 0.0                             !bcm(3)%abg[(1,sca,l),(2,sca,l),(3,sca,l)]:                     ALFA BETA GAMMA FOR SCALAR
+1.0 0.0 0.0                             !bcm(3)%abg[(1,vari,l),(2,vari,l),(3,vari,l)]:                  ALFA BETA GAMMA FOR VARIANCE
+1.0 0.0 0.0                             !bcm(3)%abg[(1,e_temp,l),(2,e_temp,l),(3,e_temp,l)]:            ALFA BETA GAMMA FOR TEMPERATURE
+1.0 0.0 0.0                             !bcm(3)%abg[(1,e_h,l),(2,e_h,l),(3,e_h,l)]:                     ALFA BETA GAMMA FOR Enthalpy
+0.0 1.0 0.0                             !bcm(3)%abg[(1,tur1,l),(2,tur1,l),(3,tur1,l)]:                  ALFA BETA GAMMA FOR TURBULENCE EQUATION 1
+0.0 1.0 0.0                             !bcm(3)%abg[(1,tur2,l),(2,tur2,l),(3,tur2,l)]:                  ALFA BETA GAMMA FOR TURBULENCE EQUATION 2
+1.0 0.0 0.0                             !bcm(3)%abg[(1,mass_frac,l),(2,mass_frac,l),(3,mass_frac,l)]:   ALFA BETA GAMMA FOR MASS FRAC
+0.0 1.0 0.0                             !bcm(3)%abg[(1,dens,l),(2,dens,l),(3,dens,l)]:                  ALFA BETA GAMMA FOR DENSITY
+
+!NORTH FACE 
+0                                               !bcm(4)%nofsr:                                                              NUMBER OF SPECIFIC REGIONS AT SOUTH FACE
+1                                               !bcm(4)%kindsr:                                                             KIND= SQUARE (1) OR CIRCLE(2)
+0.0d0 440.0d-3 20.0d-3 20.0d-3 0.0d0 80.0d-5    !bcm(4)%(square_x1,square_x2,square_x3,square_x4,square_x5,square_x6):      (SQUARE: XI, XN, YI, YN, ZI, ZN ; CIRCLE: RAIO, XC, YC, ZC; STL_FILE:path and name of stl files)
+0                                               !bcm(4)%noisekind:                                                          0 - none , 1 - white noise, 2 - smirnov noise
+1.0 0.0 0.0                                     !bcm(4)%(noisePercentageU,noisePercentageV,noisePercentageW):               noise percentagen at u, v, w
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,pres,l),(2,pres,l),(3,pres,l)]:                              ALFA BETA GAMMA FOR PRESSURE
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,velu,l),(2,velu,l),(3,velu,l)]:                              ALFA BETA GAMMA FOR U VELOCITY
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,velv,l),(2,velv,l),(3,velv,l)]:                              ALFA BETA GAMMA FOR V VELOCITY
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,velw,l),(2,velw,l),(3,velw,l)]:                              ALFA BETA GAMMA FOR W VELOCITY
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,vof,l),(2,vof,l),(3,vof,l)]:                                 ALFA BETA GAMMA FOR VOF
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,sca,l),(2,sca,l),(3,sca,l)]:                                 ALFA BETA GAMMA FOR SCALAR
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,vari,l),(2,vari,l),(3,vari,l)]:                              ALFA BETA GAMMA FOR VARIANCE
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,e_temp,l),(2,e_temp,l),(3,e_temp,l)]:                        ALFA BETA GAMMA FOR TEMPERATURE
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,e_h,l),(2,e_h,l),(3,e_h,l)]:                                 ALFA BETA GAMMA FOR Enthalpy
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,tur1,l),(2,tur1,l),(3,tur1,l)]:                              ALFA BETA GAMMA FOR TURBULENCE EQUATION 1
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,tur2,l),(2,tur2,l),(3,tur2,l)]:                              ALFA BETA GAMMA FOR TURBULENCE EQUATION 2
+1.0 0.0 0.0                                     !bcm(4)%abg[(1,mass_frac,l),(2,mass_frac,l),(3,mass_frac,l)]:               ALFA BETA GAMMA FOR MASS FRAC
+0.0 1.0 0.0                                     !bcm(4)%abg[(1,dens,l),(2,dens,l),(3,dens,l)]:                              ALFA BETA GAMMA FOR DENSITY
+
+
+!BOTTOM FACE 
+0                                               !bcm(5)%nofsr:                                                              NUMBER OF SPECIFIC REGIONS AT BOTTOM FACE
+1                                               !bcm(5)%kindsr:                                                             KIND= SQUARE (1) OR CIRCLE(2)
+0.0d0 440.0d-3 0.0d0 20.0d-3 0.0d0 0.0d0        !bcm(5)%(square_x1,square_x2,square_x3,square_x4,square_x5,square_x6):      (SQUARE: XI, XN, YI, YN, Zi, ZN; CIRCLE: RAIO, XC, YC, ZC; STL_FILE:path and name of stl files)
+0                                               !bcm(5)%noisekind:                                                          0 - none , 1 - white noise, 2 - smirnov noise
+1.0 0.0 0.0                                     !bcm(5)%(noisePercentageU,noisePercentageV,noisePercentageW):               noise percentagen at u, v, w
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,pres,l),(2,pres,l),(3,pres,l)]:                              ALFA BETA GAMMA FOR PRESSURE
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,velu,l),(2,velu,l),(3,velu,l)]:                              ALFA BETA GAMMA FOR U VELOCITY
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,velv,l),(2,velv,l),(3,velv,l)]:                              ALFA BETA GAMMA FOR V VELOCITY
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,velw,l),(2,velw,l),(3,velw,l)]:                              ALFA BETA GAMMA FOR W VELOCITY
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,vof,l),(2,vof,l),(3,vof,l)]:                                 ALFA BETA GAMMA FOR VOF
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,sca,l),(2,sca,l),(3,sca,l)]:                                 ALFA BETA GAMMA FOR SCALAR
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,vari,l),(2,vari,l),(3,vari,l)]:                              ALFA BETA GAMMA FOR VARIANCE
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,e_temp,l),(2,e_temp,l),(3,e_temp,l)]:                        ALFA BETA GAMMA FOR TEMPERATURE
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,e_h,l),(2,e_h,l),(3,e_h,l)]:                                 ALFA BETA GAMMA FOR Enthalpy
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,tur1,l),(2,tur1,l),(3,tur1,l)]:                              ALFA BETA GAMMA FOR TURBULENCE EQUATION 1
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,tur2,l),(2,tur2,l),(3,tur2,l)]:                              ALFA BETA GAMMA FOR TURBULENCE EQUATION 2
+1.0 0.0 0.0                                     !bcm(5)%abg[(1,mass_frac,l),(2,mass_frac,l),(3,mass_frac,l)]:               ALFA BETA GAMMA FOR MASS FRAC
+0.0 1.0 0.0                                     !bcm(5)%abg[(1,dens,l),(2,dens,l),(3,dens,l)]:                              ALFA BETA GAMMA FOR DENSITY
+
+!TOP FACE 
+0                                               !bcm(6)%nofsr:                                                              NUMBER OF SPECIFIC REGIONS AT TOP FACE
+1                                               !bcm(6)%kindsr:                                                             KIND= SAQUARE (1) OR CIRCLE(2)
+0.0d0 440.0d-3 0.0d0 20.0d-3 80.0d-5 80.0d-5    !bcm(6)%(square_x1,square_x2,square_x3,square_x4,square_x5,square_x6):      (SQUARE: XI, XN, YI, YN, ZI, ZN; CIRCLE: RAIO, XC, YC, ZC; STL_FILE:path and name of stl files)
+0                                               !bcm(6)%noisekind:                                                          0 - none , 1 - white noise, 2 - smirnov noise
+1.0 0.0 0.0                                     !bcm(6)%(noisePercentageU,noisePercentageV,noisePercentageW):               noise percentagen at u, v, w
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,pres,l),(2,pres,l),(3,pres,l)]:                              ALFA BETA GAMMA FOR PRESSURE
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,velu,l),(2,velu,l),(3,velu,l)]:                              ALFA BETA GAMMA FOR U VELOCITY
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,velv,l),(2,velv,l),(3,velv,l)]:                              ALFA BETA GAMMA FOR V VELOCITY
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,velw,l),(2,velw,l),(3,velw,l)]:                              ALFA BETA GAMMA FOR W VELOCITY
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,vof,l),(2,vof,l),(3,vof,l)]:                                 ALFA BETA GAMMA FOR VOF
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,sca,l),(2,sca,l),(3,sca,l)]:                                 ALFA BETA GAMMA FOR SCALAR
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,vari,l),(2,vari,l),(3,vari,l)]:                              ALFA BETA GAMMA FOR VARIANCE
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,e_temp,l),(2,e_temp,l),(3,e_temp,l)]:                        ALFA BETA GAMMA FOR TEMPERATURE
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,e_h,l),(2,e_h,l),(3,e_h,l)]:                                 ALFA BETA GAMMA FOR Enthalpy
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,tur1,l),(2,tur1,l),(3,tur1,l)]:                              ALFA BETA GAMMA FOR TURBULENCE EQUATION 1
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,tur2,l),(2,tur2,l),(3,tur2,l)]:                              ALFA BETA GAMMA FOR TURBULENCE EQUATION 2
+1.0 0.0 0.0                                     !bcm(6)%abg[(1,mass_frac,l),(2,mass_frac,l),(3,mass_frac,l)]:               ALFA BETA GAMMA FOR MASS FRAC
+0.0 1.0 0.0                                     !bcm(6)%abg[(1,dens,l),(2,dens,l),(3,dens,l)]:                              ALFA BETA GAMMA FOR DENSITY

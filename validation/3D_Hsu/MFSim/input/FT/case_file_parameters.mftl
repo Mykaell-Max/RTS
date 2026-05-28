@@ -1,0 +1,14 @@
+remeshSequence   coarsen edgeFlip refine laplSmoothing 
+tolVolume        0.01
+maxVertexAngle   40.          
+maxElementAngle  50.          
+minElementAngle  30. 
+referenceLength  0.000625
+tolRefinement    0.2        
+tolCoarsening   -0.1       
+remeshIter       1        
+saveIter         10      
+bkpIter          100    
+volRecovery      10   
+timeStep         0.001 
+simTime          3.0  

@@ -1,0 +1,110 @@
+!==============================================================
+!   /\\\\\\\\\      /\\\\\\\\\\\\\\\     /\\\\\\\\\\\        
+!  /\\\///////\\\   \///////\\\/////    /\\\/////////\\\     
+!  \/\\\     \/\\\         \/\\\        \//\\\      \///     
+!   \/\\\\\\\\\\\/          \/\\\         \////\\\           
+!    \/\\\//////\\\          \/\\\            \////\\\       
+!     \/\\\    \//\\\         \/\\\               \////\\\    
+!      \/\\\     \//\\\        \/\\\        /\\\      \//\\\
+!       \/\\\      \//\\\       \/\\\       \///\\\\\\\\\\\/
+!        \///        \///        \///          \///////////     
+!================= Radiation input parameters =================
+.true.      !Use radiation module
+!====================== Coupling Options ======================
+.true.      !RTE/Energy Coupling
+.true.      !Boundary flux Coupling
+1       	  !Evaluation interval between iterations
+!======================= Start criteria =======================
+1           !Evaluate from: 1 - Beginning, 2 - A given time, 3 - A given iteration
+0.1d0       !Time to start the evaluation (if the option 2 has been selected)
+1           !Iteration to start the evaluation (if the option 3 has been selected)
+!========================= Mesh Sizes =========================
+21          ! Number of cells in x direction
+21          ! Number of cells in y direction
+1           ! Number of cells in z direction
+Coupled          ! Discretization: 1D, 2D, 3D or Coupled with MFSim
+!================= Mesh Generation Parameters =================
+.false.     !Add paths (if true go to paths.rts)
+1      !Number of paths
+!====================== Path Coordinates ======================
+!  Xi    Xf     Yi     Yf     Zi     Zf   Level  
+ 0.5d0 1.5d0  0.0d0  0.0d0  0.0d0  0.0d0    2   !Path 1
+!============ Radiation Method for Solving the RTE ============
+FAM         !Radiation module: FAM, DOM, P1
+Upwind      !Spatial Scheme for the RTE: Upwind,CDS
+!----------------- Scattering Phase Function ------------------
+.false.     !Use anisotropic scattering model
+linear      !Scattering Model: Mie,Rayleigh,Linear,HG
+F2          !Mie scattering: F0-F7,B0-B3
+1.0d0       !Linear phase function coefficient (-1 < A < 1)
+!==================== Finite Angle Method =====================
+8           !control angles in phi direction
+4           !control angles in theta direction
+6           !Angular subdivisions anisotropic scattering
+!================= Discrete Ordinates Method ==================
+Tn          !Quadrature model: Sn,Tn,Qn
+4           !Quadrature order: 2,4,6.. for Sn 1,2,3.. for Tn and Qn
+!============== Radiative Gas Properties Module ===============
+.false.     !Gas properties module
+ WSGG       !Absorption model: Gray, WSGG
+.false.     !Use non-gray radiation
+!====================== Input Parameters ======================
+! uniform     value         variable name
+!  field    (if true)    
+!--------------------------------------------------------------  
+  .true.   64.8032d0   !Temperature [K]
+  .true.     0.0d0     !Incident radiation [w/m^2]
+  .true.    1.00d0     !Absorption coefficient  [m^-1]
+  .true.     0.0d0     !Scattering coefficient  [m^-1]
+  .true.     0.10d0    !CO2 mole fraction
+  .true.     0.20d0    !H2O mole fraction
+  .true.   101.325d3   !Pressure of the mixture (atm)
+!NOTE: if false go to RTS_functions.f90 and setup
+!================== Information at the Walls ==================
+!     T        ew      uniform   symmetry    Wall
+   000.0d0    1.0d0    .true.     .false.   !WEST
+   000.0d0    1.0d0    .true.     .false.   !EAST
+   000.0d0    1.0d0    .true.     .false.   !SOUTH
+   000.0d0    1.0d0    .true.     .false.   !NORTH
+   000.0d0    1.0d0    .true.     .false.   !BOTTOM
+   000.0d0    1.0d0    .true.     .false.   !TOP
+!NOTE: if uniform is false go to RTS_functions.f90 and setup
+!==================== Convergence Criteria ====================
+1.0d-6      !Radiation convergence criteria
+10000       !Maximum number of iterations
+!===============================================================
+!                         Save Options                          
+!===============================================================
+.true.      !Save results to csv
+.true.      !Save results to vtk
+.true.      !Save results to dat
+.false.     !Save the mesh position vectors
+.false.     !Save wall results to vtk (only for 3D simulations)
+.false.     !Nusselt Calculation Module
+!==============================================================
+!                    Recorded Variables List                    
+!===============================================================
+.true.    !Temperature               ID 1
+.true.    !Incident  radiation       ID 2
+.true.    !Divergent rad flux        ID 3
+.true.   !Blackbody radiation       ID 4
+.true.   !Absorption coefficient    ID 5
+.true.   !Scattering coefficient    ID 6
+.true.   !Extinction coefficient    ID 7
+.false.   !Thermal conductivity      ID 8
+.true.   !Radiation emissivities    ID 9
+.true.    !Q_radw (only on csv)      ID 10
+.false.    !Pressure                  ID 11
+.false.    !X_CO2                     ID 12
+.false.    !X_H2O                     ID 13  
+!===============================================================
+!                  Walls Custom Variable Save
+!===============================================================
+!  WEST    EAST   SOUTH   NORTH   BOTTOM   TOP
+.false. .false. .false. .false. .false. .false. !Temperature
+.false. .false. .false. .false. .false. .false. !Incident  radiation
+.false. .false. .false. .false. .false. .false. !Blackbody radiation
+.true.  .true.  .true.  .true.  .true.  .true.  !Radiative Walls fluxes   ID 10
+.false. .false. .false. .false. .false. .false. !Emissivities at the walls
+ !===============================================================
+

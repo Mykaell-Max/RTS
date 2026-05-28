@@ -1,0 +1,59 @@
+!! scalar input file. Readed in input_data_sca subroutine
+
+!!!****Scalar control parameters****!!!
+
+!---- Scalar equation ---------------------------
+.false.                                     !transpEquation:                                Use transport equation of a generic scalar(transpEquation)
+2                                           !kind_sca_transp_solver:                        Scalar solver: 1 PetsC , 2 Multigrid
+1                                           !temporal_discretization_model_scalar:          temporal discretization model for scalar (1: semi-implicit, 2: implicit)
+"CDS"                                       !advection_model_scalar:                        advection model for scalar:  IMPLICIT: CDS, upwind1O, upwind2O, cubista.  SEMI-IMPLICIT: upwind1O, upwind2O, Barton, MSOU, CDS, cubista, QUICK, QUICKhayase;
+.false.                                     !scalar_cons:                                   Use divergente form of Scalar Equation
+1                                           !fluxConstr_sca:                                Strategy of the fluxes construction: 1-Traditional, 2-Malalasekera
+.false.                                     !update_sca:                                    (update rho and mu based on a passive scalar)
+
+!---- Variance equation -------------------------
+.false.                                     !varianceEquation:                              Use transport equation of variance(varianceEquation)
+2                                           !kind_var_transp_solver:                        Variance solver: 1 PetsC , 2 Multigrid
+1                                           !temporal_discretization_model_variance:        temporal discretization model for variance (1: semi-implicit, 2: implicit)
+"cubista"                                   !advection_model_variance:                      advection model for variance:  IMPLICIT: upwind1O, upwind2O, CDS, QUICK, QUICKhayase;    SEMI-IMPLICIT: upwind1O, upwind2O, Barton, MSOU, CDS, cubista, QUICK, QUICKhayase;
+.false.                                     !variance_cons:                                 Use divergente form of Variance Equation
+1                                           !fluxConstr_var:                                Strategy of the fluxes construction: 1-Traditional, 2-Malalasekera
+
+!---- Concentrations equations ------------------
+.false.                                     !concentrations:                                    Use transport equation of concentrations (multiple_scalars)
+2                                           !kind_concentrations_transp_solver:                 Concentrations solver: 1 PetsC , 2 Multigrid
+1                                           !temporal_discretization_model_concentrations:      temporal discretization model for concentrations: (1: semi-implicit, 2: implicit)
+"cubista"                                   !advection_model_concentrations:                    advection model for concentrations:  IMPLICIT: upwind1O, upwind2O, CDS, QUICK, QUICKhayase;    SEMI-IMPLICIT: upwind1O, upwind2O, Barton, MSOU, CDS, cubista, QUICK, QUICKhayase;
+.false.                                     !concentrations_cons:                           Use divergente form of Concentrations Equations
+1                                           !fluxConstr_concen:                             Strategy of the fluxes construction: 1-Traditional, 2-Malalasekera
+
+!---- Convection coefficients for Robin BC ------------------
+0.0001d0                                    !alfaRefer:                                     mi/pr
+2.0d0                                       !h_IB:
+1.0d0                                       !ks_IB:
+300.0d0                                     !Tinf_IB:
+4.76d-5                                     !diffusivitycoef:                               diffusivity coefficient
+0.70d0                                      !Sc_t:                                          Schmit number
+.false.                                     !corrosion_model:                               Use Corrosion Model
+
+!########### Scalar boundary conditions ##############
+0.0d0  1.0d0  0.0d0                         !sbc_w%(alfa_bc,beta_bc,gamma_bc):              sca boundary condition at WEST   face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !sbc_e%(alfa_bc,beta_bc,gamma_bc):              sca boundary condition at EAST   face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !sbc_s%(alfa_bc,beta_bc,gamma_bc):              sca boundary condition at SOUTH  face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !sbc_n%(alfa_bc,beta_bc,gamma_bc):              sca boundary condition at NORTH  face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !sbc_b%(alfa_bc,beta_bc,gamma_bc):              sca boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !sbc_t%(alfa_bc,beta_bc,gamma_bc):              sca boundary condition at TOP    face (alfa, beta, gamma)
+!########### Variance boundary conditions ##############
+0.0d0  1.0d0  0.0d0                         !cbc_w%(alfa_bc,beta_bc,gamma_bc):              vari boundary condition at WEST   face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !cbc_e%(alfa_bc,beta_bc,gamma_bc):              vari boundary condition at EAST   face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !cbc_s%(alfa_bc,beta_bc,gamma_bc):              vari boundary condition at SOUTH  face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !cbc_n%(alfa_bc,beta_bc,gamma_bc):              vari boundary condition at NORTH  face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !cbc_b%(alfa_bc,beta_bc,gamma_bc):              vari boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !cbc_t%(alfa_bc,beta_bc,gamma_bc):              vari boundary condition at TOP    face (alfa, beta, gamma)
+!########### Concentrations boundary conditions ##############!
+0.0d0  1.0d0  0.0d0                         !ykbc_w%(alfa_bc,beta_bc,gamma_bc):             concentration boundary condition at WEST   face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !ykbc_e%(alfa_bc,beta_bc,gamma_bc):             concentration boundary condition at EAST   face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !ykbc_s%(alfa_bc,beta_bc,gamma_bc):             concentration boundary condition at SOUTH  face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !ykbc_n%(alfa_bc,beta_bc,gamma_bc):             concentration boundary condition at NORTH  face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !ykbc_b%(alfa_bc,beta_bc,gamma_bc):             concentration boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !ykbc_t%(alfa_bc,beta_bc,gamma_bc):             concentration boundary condition at TOP    face (alfa, beta, gamma)

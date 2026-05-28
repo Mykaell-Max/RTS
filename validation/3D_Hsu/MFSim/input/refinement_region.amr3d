@@ -1,0 +1,16 @@
+!! refinement region input file. Readed in input_refinement_region subroutine
+
+0                                       !nofsr:                         number of regions
+
+2                                       !level_sr:                      levels it should be covered
+0.000d+00 1.000d+00 0.000d+00 4.800d-02 0.000d+00 1.000d+00     !xi, xf, yi, yf, zi, zf:        paralelepiped coordinates (xo, xmax, yo, ymax, zo, zmax)
+2                                       !level_sr:                      levels it should be covered
+0.000d+00 1.000d+00 2.720d-01 3.200d-01 0.000d+00 1.000d+00     !xi, xf, yi, yf, zi, zf:        paralelepiped coordinates (xo, xmax, yo, ymax, zo, zmax)
+2                                       !level_sr:                      levels it should be covered
+0.000d+00 1.500d-01 0.000d+00 3.200d-01 0.000d+00 1.000d+00     !xi, xf, yi, yf, zi, zf:        paralelepiped coordinates (xo, xmax, yo, ymax, zo, zmax)
+2                                       !level_sr:                      levels it should be covered
+8.500d-01 1.000d+00 0.000d+00 3.200d-01 0.000d+00 1.000d+00     !xi, xf, yi, yf, zi, zf:        paralelepiped coordinates (xo, xmax, yo, ymax, zo, zmax)
+2                                       !level_sr:                      levels it should be covered
+0.000d+00 1.000d+00 0.000d+00 3.200d-01 0.000d+00 1.500d-01     !xi, xf, yi, yf, zi, zf:        paralelepiped coordinates (xo, xmax, yo, ymax, zo, zmax)
+2                                       !level_sr:                      levels it should be covered
+0.000d+00 1.000d+00 0.000d+00 3.200d-01 8.500d-01 1.000d+00     !xi, xf, yi, yf, zi, zf:        paralelepiped coordinates (xo, xmax, yo, ymax, zo, zmax)

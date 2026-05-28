@@ -1,0 +1,43 @@
+!! Energy input file. Readed in input_data_energy subroutine
+
+!!!****Energy control parameters****!!!
+.true.                 !Use energy equation for temperature(energyEquation)
+.false.                 !h_form (chemical + sensible enthalpy)
+2                      !Energy solver: 1 PetsC , 2 Multigrid
+2                      !Temporal discretisation of energy (1: semi-implicit, 2: implicit)
+"cubista"             !advection model temperature:  IMPLICIT: upwind1O, upwind2O, CDS, QUICK, QUICKhayase;    SEMI-IMPLICIT: upwind1O, upwind2O, Barton, MSOU, CDS, cubista, QUICK, QUICKhayase;
+.false.                 !Use divergente form of Energy Equation
+2                      !Strategy of the fluxes construction: 1-Traditional, 2-Malalasekera
+
+.false.                                     !dens_temp:                                 Use density calculation based on temperature
+10000000                                         !dt_pres:                                   Tempo para adicionar a variação da pressão na equação da eneriga
+.false.  0.d0  0.d0                         !trunc_energy,Tmin_truncate,Tmax_truncate:  Truncate temperature? [T/F] [T_min] [T_max]
+
+!#############Boussinesq aproximation ###########################
+.true.                  !Use de Boussinesq approximation (boussinesqApprox)
+333.3333d0                 !Temperature of reference of Boussinesq term(referTemp)
+.false.                 !Phase change
+.false.                 !Phase change with multicomponent
+0                       !eulerian phase change model- 0: split, 1: source
+3000.0d0                !latent heat 
+0.0d0                   !saturation temperature 
+0.71d0                   ! turbulent prandtl number  
+
+!########### Physical properties ##############
+1202.3998103642064d0 1202.3998103642064d0                    !specific heat at continuous phase and disperse phase (cp_phase_c, cp_phase_d)
+0.02604944054127262d0      0.02604944054127262d0                      !thermal conductivity at continuous phase and disperse phase (k_phase_c, k_phase_d)
+
+!########### Temperature boundary conditions ##############
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at WEST face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at EAST face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at SOUTH face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at NORTH face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at BOTTOM face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at TOP face (alfa, beta, gamma, bc_kind, g) 
+!########### Enthalpy boundary conditions ##############
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at WEST face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at EAST face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at SOUTH face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at NORTH face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at BOTTOM face (alfa, beta, gamma, bc_kind, g)
+1.0d0  0.0d0  0.0d0                        !temp boundary condition at TOP face (alfa, beta, gamma, bc_kind, g) 

@@ -1,0 +1,111 @@
+!! reaction input file. Readed in input_data_reactive subroutine
+
+!!!****Control flags****!!!
+.true.                                                 ! use_cantera
+.false.                                                 ! upd8_only_vis
+.false.                                                 ! use_comb:
+.false.                                                 ! virtual_logical:                  use virtual chemistry    
+.false.                                                 ! transpdf:                         use pdf [true|false]. Default = false 
+
+!!!****Chemical reaction control parameters****!!!
+.true.                                                 !eul_cantera_props: 
+.false. 2                                               !use_operator_splitting,kind_split: number of chemical steps [1|2]
+1.0d-6 1.0d-12                                          !CVodeInt_rtol, CVodeInt_atol:      CVodeIntegrator relative and absolute tolerances 
+.false.                                                 !evap_logical: 
+gri30.yaml                                    !cti_file:                          CTI file
+gas                                                    !cant_mechanism:                    mechanism for cantera
+multicomponent                                              !cant_transport:                    transport for cantera
+1                                                       !nSpg:                              Number gas species
+"C3H8:0.04007046,O2:0.22366331,N2:0.73626623"           !comp_main_jet:                     composition in main jet or unburnt jet
+"CO2:0.00019120963567262992,H2O:0.3913564937447372,N2:0.6084522966195901"           !comp_coflow:                       composition in coflow jet or burnt jet
+"C3H8:0.04007046,O2:0.22366331,N2:0.73626623"           !comp_pilot_jet:                    composition in pilot jet
+288.0d0 288.00d0 288.00d0  101000                       !T1_mix, T2_mix, T3_mix, Po: 
+C3H8 N2                                                 !Main_fuel, Main_dil:
+CO2                                                     !spec_rmsh:                         species used for remesh - ATTENTION: add 'Y' as options of refinement
+.false.                                                 !mix_frac:                          (mixture fraction formulation - for diffusive flames and passive scalar)
+.false.                                                 !prog_var:                          (progress variable formulation - for premixed flames and passive scalar)
+.false.                                                 !diffusivities:                     species diffusivities
+.false. AR                                              !rmv_dilutant,dilutant_to_rmv:      removes the indicated dilutant from the transport loop to avoid problems
+
+!!!****Reactions for Virtual Chemistry****!!!
+lookuptable.dat                                         !loockup_table:         Virtual loockup table
+4.0280972480988923e+18   0.0   51153.730595099594       !v_arrh1(1,2,3):        Virtual reaction 1
+1.2494183350215957   1.0846548016209874                 !ord1_f, ord1_o2:       Reaction order with respect to F and O2
+1.5528263328628685e+18  0.0   83870.0861109968          !v_arrh2(1,2,3):        Virtual reaction 2
+0.6804793587649594                                      !ord2_i:                Reaction order with respect to I
+16.043                                                  !f_weight:              F virtual molecular weight
+0.0                                                     !i_weight:              I virtual molecular weight
+31.998                                                  !ox_weight:             Ox virtual molecular weight
+28.014                                                  !d_weight:              D virtual molecular weight
+53.16298963191927                                       !p1_weight:             P1 virtual molecular weight
+25.994229343345374                                      !p2_weight:             P2 virtual molecular weight
+30.43205653623305                                       !p3_weight:             P3 virtual molecular weight
+9.864189820169873
+
+!!!****Adaptive Zoning control parameters****!!!
+.false.                                    ! use_adap_zoning
+.false. 0.768 0.4851                       ! diffusive_flame, YN2ox, YN2fuel:
+.true.  10                                 ! use_temp_bin, temp_bin_size:           create temperature zone (use_temp_bin), provide zone size (temp_bin_size)
+.true.  0.05                                ! use_phi_bin, phi_bin_size:             create progress equivalence ratio zone (use_phi_bin) - provide zone size (phi_bin_size)
+.false. CO  0.01                           ! use_Yk1_bin, Yk1_bin, Yk1_bin_size:    create 1st Yk zone (use_Yk1_bin) - species used for 1st Yk zone (Yk1_bin) - provide zone size (Yk1_bin_size)
+.false. H2  0.0025                         ! use_Yk2_bin, Yk2_bin, Yk2_bin_size:    create 2nd Yk zone (use_Yk2_bin) - species used for 2nd Yk zone (Yk2_bin) - provide zone size (Yk2_bin_size)
+
+!########### Combustion modeling ##############
+.false.                                                 !pure_mixing:
+.false.                                                 !burke_schumann:                    (only for diffusive flames)
+.false. 1.0d0 .false. 1.0                               !rlx2ChemEq, rlxation_val           Relaxation to Chemical Equilibrium model, relaxation value used on reaction and energy source terms
+.false.                                                 !arrhenius:
+.false.                                                 !ztfscm:                            zimont turbulent flame speed closure model
+.false.                                                 !ebu:
+.false.                                                 !bml:
+.false.                                                 !edm:
+.false.                                                 !edc:
+.false.                                                 !hybrid_arrhenius_edc:
+
+!########### Ignition modeling ##############
+.false.  20525  1.25d10                                 !ignite_pwr, ct_ignt, Pwr_ignt:             ignite the mixture with power (ignite_pwr), ignite stop iteration (ct_ignt), ignite Pwr (Pwr_ignt)
+.false.  0.001  2200                                    !ignite_spark, dt_spark, T_spark:           ignite the mixture with hot spots (ignite_spark), spark duration (dt_spark), spark temperature (T_spark)
+1                                                       !n_spots:                                   number of ignite spots (n_spots)
+19.0d-3  3.90625d-5  3.90625d-5   1.953125d-5           !spark_xc, spark_yc, spark_zc, spark_raio:  ignite position 
+
+!########### ISAT ##############
+.false.                                                 !FLAG_ISAT_ON:                      turn ISAT ON (.true.) / OFF (.false.)
+1                                                       !FLAG_BST_KILL:                     turn binary search tree restart ON (1) / OFF (0) 
+2009                                                    !FLAG_ISAT_VERSION:                 ISAT version (2009 or 1997)
+200000                                                  !maxleaves:                         maximum number of leaves in the binary tree (a very large number can explode the memory!!)
+5                                                       !MRU_size:                          size of the MRU list                    (Default value: 5      )
+30                                                      !MFU_size:                          size of the MFU list                    (Default value: 30     )
+2                                                       !Naff:                              affine subspace dimension               (Default value: 5      )
+1.0d-3                                                  !etol:                              ISAT error tolerance - etol             (Default value: 1.0d-04)
+1.0d0                                                   !atol_w:                            error scaling matrix absolute tolerance (Default value: 1.0d00 )
+0.0d0                                                   !rtol_w:                            error scaling matrix relative tolerance (Default value: 0.0d00 )
+1.0d-12  14                                             !atol_s:                            Jacobian solver absolute tolerance      (Default value: 1.0d-12)
+1.0e-6                                                  !rtol_s:                            Jacobian solver relative tolerance      (Default value: 1.0d-06)
+
+!########### PDF input data ##############
+.false.                                                 !FLAG_PDF_PRINT:
+.false.                                                 !FLAG_PDF_EulLagEquiv:
+10                                                      !particles_per_cell: 
+
+! Cloning and annihilation parameters
+0.8d0                                                   !npc_min factor:                    PER LEAF MINIMUM = npc_min factor*PARTICLES_PER_CELL  - It must be greater than 0.5*PARTICLES_PER_CELL
+3.0d0                                                   !npc_max factor:                    PER LEAF MAXIMUM = npc_max factor*PARTICLES_PER_CELL
+1                                                       !annihilation_type:                 TYPE 1 - without any preference; TYPE 2 - zeta ordering
+
+! SCALAR TRANSPORT PARAMETERS
+2.0d0                                                   !Comega: 
+1.0d0                                                   !Sc_pdf:
+
+! BC PARAMETERS
+0 0 1 1 0 0                                             !bc_type_x1, bc_type_x2, bc_type_y1, bc_type_y2, bc_type_z1, bc_type_z2
+
+! Inlet BC PARAMETERS
+0 0d0                                                   !inlet_bc_type, inlet_bc_value
+0                                                       !composed_inlet_flag
+0                                                       !composed_msh_level
+0d0 0d0 0d0 0d0 0d0 0d0                                 !composed_center_x, composed_center_y, composed_center_z, composed_delta_x, composed_delta_y, composed_delta_z
+
+! Preset cases parameters
+0                                                       !bc_setup
+0d0 0d0                                                 !targ_mix, mixlgth
+0d0                                                     !H_jet

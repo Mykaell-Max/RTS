@@ -1,0 +1,46 @@
+!==============================================================
+!   /\\\\\\\\\      /\\\\\\\\\\\\\\\     /\\\\\\\\\\\        
+!  /\\\///////\\\   \///////\\\/////    /\\\/////////\\\     
+!  \/\\\     \/\\\         \/\\\        \//\\\      \///     
+!   \/\\\\\\\\\\\/          \/\\\         \////\\\           
+!    \/\\\//////\\\          \/\\\            \////\\\       
+!     \/\\\    \//\\\         \/\\\               \////\\\    
+!      \/\\\     \//\\\        \/\\\        /\\\      \//\\\
+!       \/\\\      \//\\\       \/\\\       \///\\\\\\\\\\\/
+!        \///        \///        \///          \///////////        
+!================== Thermal Input Parameters ==================
+.false.     !Solve energy equation
+.true.      !Energy equation without radiation
+.false.     !Transient simulation
+298.15d0    !Room temperature, for convection only [K]
+!================== Thermal Input Parameters ==================
+! uniform     value         variable name
+!  field    (if true)
+!--------------------------------------------------------------
+  .true.     0.1d0     !Fluid density [kg/m^3]
+  .true.     10.0d0    !Specific heat [J/kg*K]
+  .true.     1.0d-2    !Thermal conductivity [W/m*K]
+!NOTE: if false go to RTS_functions.f90 and setup
+!================== Information at the Walls ==================
+!  T        h_conv    Face
+ 000.0d0    6.0d+2    !WEST
+ 000.0d0    6.0d+2    !EAST
+ 000.0d0    6.0d+2    !SOUTH
+ 000.0d0    6.0d+2    !NORTH
+ 000.0d0    6.0d+2    !BOTTOM
+ 000.0d0    6.0d+2    !TOP
+!===================== Boundary Conditions ====================
+!          1 - Dirichlet    2 - Neumann    3 - Robin  
+!==============================================================
+1           !WEST
+1           !EAST
+1           !SOUTH
+1           !NORTH
+1           !BOTTOM    
+1           !TOP
+!==================== Convergence Criteria ====================
+1.0d-6      !Energy convergence criteria
+!======================= Saving Results =======================
+700.0d0     !final simulation time
+15          !save the data each CTS time step
+!==============================================================

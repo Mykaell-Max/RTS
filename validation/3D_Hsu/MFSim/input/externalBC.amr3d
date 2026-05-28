@@ -1,0 +1,34 @@
+!! externalbc input file. Readed in input_external_bc subroutine
+
+!!!****External input files****!!!
+.false.   !OK                              !external_bc_vel:               use external input file for boundary condition? - VELOCITIES (EULER-PHASE)
+"externalBC/vel_converted.dat"                    !external_bc_vel_filepath:      filepath
+41                                         !external_nface_vel:            n - number of cells in face for each direction (face results in n*n)
+
+.false.  !OK                                   !external_bc_temp:              use external input file for boundary condition? - TEMPERATURE
+"externalBC/temp.dat"                    !external_bc_temp_filepath:     filepath
+41                                         !external_nface_temp:           n - number of cells in face for each direction (face results in n*n)
+
+.false.                                     !external_bc_yk:                use external input file for boundary condition? - MASS FRACTION
+"externalBC/yk.txt"                         !external_bc_yk_filepath:       filepath
+160                                         !external_nface_yk:             n - number of cells in face for each direction (face results in n*n)
+
+.false.                                    !external_bc_dpmdiam:           use external input file for boundary condition? - DPM_DIAMETER
+"externalBC/dpm_diamc_i.dat"                   !external_bc_dpmdiam_filepath:  filepath
+41                                         !external_nface_dpmdiam:        n - number of cells in face for each direction (face results in n*n)
+
+.false. !OK                                    !external_bc_dpmvel:            use external input file for boundary condition? - DPM_VEL
+"externalBC/dpm_vel_in.dat"                    !external_bc_dpvmel_filepath:   filepath
+41                                         !external_nface_dpmvel:         n - number of cells in face for each direction (face results in n*n)
+
+.false.                                     !external_bc_dpmtemp:           use external input file for boundary condition? - DPM_TEMP
+"externalBC/dados_dpm_temp.txt"                   !external_bc_dpmtemp_filepath:  filepath
+41                                         !external_nface_dpmtemp:        n - number of cells in face for each direction (face results in n*n)
+
+.false.                                     !external_bc_dpmflow:           use external input file for boundary condition? - DPM_FLOW
+"externalBC/dpm_flow.txt"                   !external_bc_dpmflow_filepath:  filepath
+41                                         !external_nface_dpmflow:        n - number of cells in face for each direction (face results in n*n)
+
+.false.      !OK                              !external_bc_turb:           use external input file for boundary condition? - DPM_VEL
+"externalBC/turb.txt"                   !external_bc_turb_filepath:  filepath
+41                                         !external_nface_dpmturb:        n - number of cells in face for each direction (face results in n*n)

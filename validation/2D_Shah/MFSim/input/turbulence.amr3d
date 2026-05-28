@@ -1,0 +1,70 @@
+!! turbulence input file. Readed in input_turbulence_amr3d subroutines
+
+!!!****turbulence control parameters****!!!
+
+!---------------- Large Eddy Simulation models (LES) ----------------!
+.false.                         !smag_model:                Smagorinsky turbulence model 
+.false.                         !vreman_model:              Vreman turbulence model 
+0.1d0                           !cte_smagorinsky:           Smagorinsky constant value 
+.false.                         !smag_vandr_model:          Smagorinsky turbulence model + Van Driest damping function 
+.false.                         !dyn_model:                 Dynamic smagorinsky turbulence model 
+.false.                         !walemodel:                 WALE turbulence model
+.false.                         !explicit_LES_filter:       use explicit filter for LES models -> Smag, Smag+VanD or Dyna 
+
+!---------------- Non-linear Large Eddy Simulation models (LES) ----------------!
+.false.                         !verst_model: Verstappen turbulence model 
+
+!---------------- Reynolds-averaged Navier–Stokes equations models (RANS) ----------------!
+.false.                         !sa_model:                  Spalart_Allmaras's model. ATTENTION: Configure [turb. eq. 1 b.c. for \tilde{nu}]
+.false.                         !kw_model:                  Wilcox's k-omega model. ATTENTION: Configure [turb. eq. 1 b.c. for k], and [turb. eq. 2 b.c. for omega]
+.false.                         !sst_model:                 Menter's k-omegaSST model. ATTENTION: Configure [turb. eq. 1 b.c. for k], and [turb. eq. 2 b.c. for omega]
+.false.                         !ke_model:                  Standard k-epsilon model. ATTENTION: Configure [turb. eq. 1 b.c. for k], and [turb. eq. 2 b.c. for omega]
+.false.                         !rke_model:                 Realizable k-epsilon model. ATTENTION: Configure [turb. eq. 1 b.c. for k], and [turb. eq. 2 b.c. for omega]
+.false.                         !two_layer_model:           Use two-layer model
+.false.                         !standard_wall_law:         Use standard wall law
+
+!--------------------------- Detached Eddy Simulation (DES) ----------------------------!
+.false.                         !des_model:                                     Apply DES model on URANS model?
+
+!--------------------------- Scale-Adaptive Simulation (SAS) ----------------------------!
+.false.                         !sas_model:                                     Apply SAS model on URANS model?
+
+2                               !kind_urans_solver:                             URANS solver: 1 PetsC , 2 Multigrid
+1                               !temporal_discretization_model_turbulence:      Temporal discretisation of turbulence variables (1: semi-implicit, 2: implicit)
+"cubista"                       !advection_model_turbulence:                    advection model for turbulence:  IMPLICIT: upwind1O, upwind2O, CDS, QUICK, QUICKhayase;    SEMI-IMPLICIT: upwind1O, upwind2O, Barton, MSOU, CDS, cubista, QUICK, QUICKhayase;
+.true.                          !turbulence_cons:                               Use divergente form of Turbulence Equation
+1                               !fluxConstr_turb:                               Strategy of the fluxes construction: 1-Traditional, 2-Malalasekera
+
+!########### Turbulence equation number 1 boundary conditions ##############
+0.0d0  1.0d0  0.0d0             !t1bc_w%(alfa_bc,beta_bc,gamma_bc):     turb1 boundary condition at WEST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t1bc_e%(alfa_bc,beta_bc,gamma_bc):     turb1 boundary condition at EAST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t1bc_s%(alfa_bc,beta_bc,gamma_bc):     turb1 boundary condition at SOUTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t1bc_n%(alfa_bc,beta_bc,gamma_bc):     turb1 boundary condition at NORTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t1bc_b%(alfa_bc,beta_bc,gamma_bc):     turb1 boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t1bc_t%(alfa_bc,beta_bc,gamma_bc):     turb1 boundary condition at TOP face (alfa, beta, gamma)
+!########### Turbulence equation number 2 boundary conditions ##############
+0.0d0  1.0d0  0.0d0             !t2bc_w%(alfa_bc,beta_bc,gamma_bc):     turb2 boundary condition at WEST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t2bc_e%(alfa_bc,beta_bc,gamma_bc):     turb2 boundary condition at EAST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t2bc_s%(alfa_bc,beta_bc,gamma_bc):     turb2 boundary condition at SOUTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t2bc_n%(alfa_bc,beta_bc,gamma_bc):     turb2 boundary condition at NORTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t2bc_b%(alfa_bc,beta_bc,gamma_bc):     turb2 boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0             !t2bc_t%(alfa_bc,beta_bc,gamma_bc):     turb2 boundary condition at TOP face (alfa, beta, gamma)
+
+1000d0                          !ratioVisc:                             Maximum ratio between turbulent viscosity and molecular viscosity - Configure for the URANS models 
+
+!!!**** Noise global parameters ****!!!
+1                               !n_type:                                                    Noise type (1- White Noise ; 2- Smirnov Noise)
+1                               !S_type:                                                    S_type (1 - isotropico 2 anisotropico)
+1.125d-05                       !turbtime:                                                  turbtime turbulent time scale
+0.05d0 0.1d0 0.05d0             !noisePercentageU, noisePercentageV, noisePercentageW:      Noise Percentages in U,V,W
+
+!!!**** Noise BC control parameters ****!!!
+.false.			                !n_bcw:                                 Noise imposition on West BC
+.false.			                !n_bce:                                 Noise imposition on East BC
+.false.			                !n_bcs:                                 Noise imposition on South BC
+.false.			                !n_bcn:                                 Noise imposition on North BC
+.false.			                !n_bcb:                                 Noise imposition on Bottom BC
+.false.			                !n_bct:                                 Noise imposition on Top BC
+
+!!!****Noise Volume control parameters****!!!
+.false.			                !n_vol:                                 Noise imposition on domain interior

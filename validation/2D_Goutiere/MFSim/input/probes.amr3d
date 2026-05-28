@@ -1,0 +1,8 @@
+!! probes input file. Readed in probes_amr3d subroutine
+
+!!#### probes setup #############################
+.false.                     !!!probes_active:               Enable probes  
+0					        !!!n_probes:                    Number of probes
+.false.                     !!!probes_follow_bubble:        Probes follow bubble's centroid (edit positions in src_amr/eul_probes), if FALSE, edit positions in ./amr3d_probes 
+.false.                     !!!probes_as_badpoints:         Treat probes as badpoints
+!!#### Probes's Coordinates : X, Y, Z [posi(probe_id,1),posi(probe_id,2),posi(probe_id,3)] #############################

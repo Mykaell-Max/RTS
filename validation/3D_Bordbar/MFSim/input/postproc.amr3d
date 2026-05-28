@@ -1,0 +1,86 @@
+!! postproc input file. Readed in post_proc_variables subroutine
+
+!!!!****List of variables to be recorded****!!!
+.true.      # postproc_rec(1):          U-velocity                    
+.true.      # postproc_rec(2):          V-velocity                    
+.true.      # postproc_rec(3):          W-velocity                    
+.false.     # postproc_rec(4):          Q-criterion                   
+.false.     # postproc_rec(5):          X-vorticity                   
+.false.     # postproc_rec(6):          Y-vorticity                   
+.false.     # postproc_rec(7):          Z-vorticity                   
+.false.     # postproc_rec(8):          Vorticity magnitude           
+.true.      # postproc_rec(9):          Pressure                      
+.false.     # postproc_rec(10):         Pressure correction           
+.true.      # postproc_rec(11):         Viscosity                     
+.true.      # postproc_rec(12):         Density                       
+.false.     # postproc_rec(13):         Volumetric fraction            ###### input.amr3d method must be 3 (VoF) or 5 (VoF+IB) 
+.false.     # postproc_rec(14):         Front Tracking                 ###### input.amr3d method must be 4 (FT) or  6 (FT+IB)
+.false.     # postproc_rec(15):         Turbulent equation number 1    ###### logical variable "kw_model.or.sst_model.or.sa_model" must be set on
+.false.     # postproc_rec(16):         Turbulent equation number 2   ###### logical variable "kw_model.or.sst_model" must be set on
+.false.     # postproc_rec(17):         Turbulent Viscosity           ###### logical variable "kw_model.or.sst_model.or.sa_model" must be set on
+.true.      # postproc_rec(18):         Temperature                   ###### logical variable "energyEquation" must be set on or it will be set as the one obtained with combustion models
+.false.     # postproc_rec(19):         Enthalpy                      ###### logical variable "energyEquation" must be set on or it will be set as the one obtained with combustion models
+.false.     # postproc_rec(20):         cp_mix
+.false.     # postproc_rec(21):         k_mix
+.false.     # postproc_rec(22):         G_rad
+.false.     # postproc_rec(23):         S_rad
+.false.     # postproc_rec(24):         Scalar                        ###### logical variable "transpEquation" must be set on
+.false.     # postproc_rec(25):         Scalar variance               ###### logical variable "varianceEquation" must be set on
+.false.     # postproc_rec(26):         dpm_npart                     ###### logical variabel "use_dpm" must be set on (dpm.amr3d)
+.false.     # postproc_rec(27):         dpm_Dnpart
+.false.     # postproc_rec(28):         dpm_diam_part
+.false.     # postproc_rec(29):         dpm_mass_part
+.false.     # postproc_rec(30):         dpm_Dmass_part
+.false.     # postproc_rec(31):         dpm_u
+.false.     # postproc_rec(32):         dpm_v
+.false.     # postproc_rec(33):         dpm_w
+.false.     # postproc_rec(34):         dpm_ufluct
+.false.     # postproc_rec(35):         dpm_vfluct
+.false.     # postproc_rec(36):         dpm_wfluct
+.false.     # postproc_rec(37):         dpm_temp_part
+.false.     # postproc_rec(38):         pdf_u
+.false.     # postproc_rec(39):         pdf_v
+.false.     # postproc_rec(40):         pdf_w
+.false.     # postproc_rec(41):         pdf_npvc
+.false.     # postproc_rec(42):         pdf_npvcRelative
+.false.     # postproc_rec(43):         pdf_total_mass
+.false.     # postproc_rec(44):         pdf_mass_avg
+.false.     # postproc_rec(45):         pdf_density
+.false.     # postproc_rec(46):         pdf_real_density
+.false.     # postproc_rec(47):         pdf_density_ratio
+.false.     # postproc_rec(48):         pdf_ww_density
+.false.     # postproc_rec(49):         pdf_temp_mean
+.false.     # postproc_rec(50):         pdf_tempVar
+.false.     # postproc_rec(51):         dpmS_H
+.false.     # postproc_rec(52):         Qsas
+.true.      # postproc_rec(53):         dwall           ### IB_indicator_function must be true           
+.true.      # postproc_rec(54):         dwall_s           ### IB_indicator_function must be true
+.true.      # postproc_rec(55):         dlagwall           ### IB_indicator_function must be true
+.true.      # postproc_rec(56):         dlagwall_s          ### IB_indicator_function must be true
+.true.      # postproc_rec(57):         pr_mark
+.true.      # postproc_rec(58):         ib_marker
+.false.     # postproc_rec(59):         divergent
+.false.     # postproc_rec(60):         gamma
+.false.     # postproc_rec(61):         Mach
+.false.     # postproc_rec(62):         ewf_h
+.false.     # postproc_rec(63):         ewf_vz
+.false.     # postproc_rec(64):         ewf_vtt
+.false.     # postproc_rec(65):         rhs_Energy
+.false.     # postproc_rec(66):         std_h
+.false.     # postproc_rec(67):         std_cp
+.false.     # postproc_rec(68):         therm_pressure
+.false.     # postproc_rec(69):         rhs_var_comp2
+.false.     # postproc_rec(70):         rhs_var_comp
+.false.     # postproc_rec(71):         rhs_comb
+.false.     # postproc_rec(72):         react_var_total (sum of mass fractions)
+.false.     # postproc_rec(73):         lewis_k                        ###### logical variables "eul_cantera_props" and "transpEquation" must be set on
+.false.     # postproc_rec(74):         wdot_k                        ###### logical variables "eul_cantera_props" and "transpEquation" must be set on
+.false.     # postproc_rec(75):         diff_k                        ###### logical variables "eul_cantera_props" and "transpEquation" must be set on
+.false.     # postproc_rec(76):         h_k                           ###### logical variables "eul_cantera_props" and "transpEquation" must be set on
+.false.     # postproc_rec(77):         rhs_arrhenius_spc             ###### logical variables "eul_cantera_props" and "transpEquation" must be set on
+.false.     # postproc_rec(78):         rhs_EDM_spc                   ###### logical variables "eul_cantera_props" and "transpEquation" must be set on
+.false.     # postproc_rec(79):         rhs_comb_spc                  ###### logical variables "eul_cantera_props" and "transpEquation" must be set on
+.true.     # postproc_rec(80):         Reactive scalars              ###### logical variables "eul_cantera_props" and "transpEquation" must be set on
+.false.     # postproc_rec(81):         pdf_Yk_mean                   ###### logical variable "transpdf" must be set on
+.false.     # postproc_rec(82):         pdf_Yk_var                    ###### logical variable "transpdf" must be set on
+.false.     # postproc_rec(83):         pdf_wdot                      ###### logical variable "transpdf" must be set on

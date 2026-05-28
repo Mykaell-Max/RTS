@@ -1,0 +1,121 @@
+!!!****mesh control parameters****!!!
+0.0d0    0.08d0   0.0d0   0.08d0   0.0d0  0.12d0  ![a1,b1]x[a2,b2]x[a3,b3]: domain (the largest parallelepiped)
+2                                    !refinement ratio                (r)
+10000                                !maximum number of cluster       (maxcl)
+1                                    !number of ghost cells           (ngc)
+2                                    !number of physical levels       (npl)
+32 32 48                          !number of cells in lbot level        
+0.99d0                               !(cuttof) - goes from 0 to 1, and define how slim is the patch
+2                                    !buffer zone between levels      (bzbl)
+2                                    !buffer zone to flagged points   (bzfp)
+.true.                               !remesh in the initial configuration: .true. or .false.
+.true.                              !.true./.false. allow the user to choose if he wants an adaptive mesh (dynamic_mesh)
+200                                   !number of time step of regriding (rfn)
+.true.                               !interface is covered by the finest level (interface_finest_level)
+1   0.01d0   0.1d0   0.05d0   0     !options of refinement: 1- density, 2- ib points, 3- curvature, 4- vorticidade_1 e 5- vorticity_2 and Control parameters of the refinement criteria number 4 (lower_lim_input, upper_lim_input), 5 (eps_input) and vorticity level limiter (vort_lim)
+0					                 !0: set the initial patch by coordinates, 1: read the initial patch from corner.amr3d file
+1                                    !number of initial patches (number_of_initial_patchs)   
+0.025d0    0.055d0   0.025d0   0.055d0   0.025d0  0.055d0
+
+
+!!!!*****Pressure velocity coupling and discretization models*****!!!!
+1     200     1.0d-8                 !kind_pressure_velocity_coupling(1-F.S., 2-SIMPLE);   maximum number of iterations(for SIMPLE);   maximum divergent(for SIMPLE)  
+0.7d0     0.3d0                      !Relaxation coefficient of velocity(for SIMPLE);   Relaxation coefficient of pressure(for SIMPLE);
+1		                             !temporal discretization model: 1 semi-implicit , 2 implicit 
+"sbdf"                               !time discretization -"sbdf","mcnab","abcn","cnlf" (implicit_disc)
+2       		                     !Conservative form: 1, not conservative form: 2
+"CDS"           		             !advection model:  IMPLICIT: upwind1O, upwind2O, CDS, QUICK, QUICKhayase;   SEMI-IMPLICIT: upwind1O, upwind2O, godunov, Barton, MSOU, CDS, skew, cubista
+0.5d0                                !Courant–Friedrichs–Lewy condition, CFL (cflGlobal)
+
+!!!****multigrid control parameters****!!!
+50                                   !maximum number of v-cycles or w-cycles (nvcmax)
+1		   	                         !smoothers options: 1- gsrb, 2- msip, 3- sip, 4- cg, 5- bicgstab (smoothers_pressure)
+.false.                              !red black smooth at pressure multigrid (redblack)
+1.0d0                                !over relaxation parameter at pressure multigrid (omeg)
+1.3d0                                !over relaxation parameter at velocity multigrid (omegv)
+1                                    !solver pressure :1- v_cycle, 2 - w_cycle, 3 - PETSc
+1                                    !solver velocity :1- v_cycle, 2 - w_cycle, 3 - SIP
+.true.                              !PETSc update matrix ?
+25  10   15                            !number of smoothness in the 2x2x2 level (relax_base), in down process (relax_down) and in up process (relax_up)
+
+!!!****two-phase control parameters****!!!
+3                                    !number of security region cells (ncsr)
+3                                    !kind of delta dirac function (distr_function)
+1000.0d0    10.0d0                       !density at continuous phase and disperse phase (dens_phase_c,dens_phase_d)
+2.735555d-1   2.73555d-3                      !viscosity at continuous phase and disperse phase (visc_phase_c,visc_phase_d)
+0.8d0        1.2d0                   !volume ratios between the lagrangian mesh and eulerian mesh (min_vol_ratio, max_vol_ratio)
+200          1.0d-3                  !maximum numbem of cycles in the direct forcing scheme (maxc), and eslon of directing force (rigid_epslon) - for rigid body
+0.1d0                                 !surface tension (surface_tension)
+0.0d0   0.0d0  -10.0d0                 !gravity acceleration (gravity_x, gravity_y, gravity_z)
+ 
+!!!****simulations condttrol parameters****!!!
+.false.                              !.true./.false. allow the user to choose if he wants to restart the code (re_start)
+1000                                 !save the data each xxx time step to restart the code (ctrst)
+3999                                 !code restart point (rct). Please check the folder "restart/". (USE THE SAME EXPRESSION AFTER "ct_")
+10                                  !number of time steps to print the results (prt)
+10000000                                !maximum number of time steps (ctmax)
+0.5d0                                !final time of simulation (final_t)
+"hdf5"                               !printing format: "tecplot"; "paraview"; "hdf5"(printing)
+
+!!!****boundary conditions control parameter ****!!!
+1                                    !stencil of discretization: 1 for second order and 2 for third order discretization (stencil)
+0   0   0                            !periodic boundary conditions: (0 -> no periodic, 1 -> periodic)
+!!!**** alfa u + beta du/dn + gamma du/dt = g****!!!!!
+!########### U velocity boundary conditions ############
+1.0d0  0.0d0  0.0d0                        !u boundary condition at WEST face (alfa, beta, gamma)
+1.0d0  0.0d0  0.0d0                        !u boundary condition at EAST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !u boundary condition at SOUTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !u boundary condition at NORTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !u boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !u boundary condition at TOP face (alfa, beta, gamma)
+!########## V velocity boundary conditions ############
+0.0d0  1.0d0  0.0d0                        !v boundary condition at WEST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !v boundary condition at EAST face (alfa, beta, gamma)
+1.0d0  0.0d0  0.0d0                        !v boundary condition at SOUTH face (alfa, beta, gamma)
+1.0d0  0.0d0  0.0d0                        !v boundary condition at NORTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !v boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !v boundary condition at TOP face (alfa, beta, gamma)
+!########## W velocity boundary conditions ############
+0.0d0  1.0d0  0.0d0                        !w boundary condition at WEST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !w boundary condition at EAST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !w boundary condition at SOUTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !w boundary condition at NORTH face (alfa, beta, gamma)
+1.0d0  0.0d0  0.0d0                        !w boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !w boundary condition at TOP face (alfa, beta, gamma)
+!########## density boundary conditions ###############
+0.0d0  1.0d0  0.0d0                        !rho boundary condition at WEST face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !rho boundary condition at EAST face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !rho boundary condition at SOUTH face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !rho boundary condition at NORTH face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !rho boundary condition at BOTTOM face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !rho boundary condition at TOP face (alfa, beta, gamma, bc_kind, g)
+!########### viscosity boundary conditions #############
+0.0d0  1.0d0  0.0d0                        !mu boundary condition at WEST face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !mu boundary condition at EAST face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !mu boundary condition at SOUTH face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !mu boundary condition at NORTH face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !mu boundary condition at BOTTOM face (alfa, beta, gamma, bc_kind, g)
+0.0d0  1.0d0  0.0d0                        !mu boundary condition at TOP face (alfa, beta, gamma, bc_kind, g)
+!########### pressure boundary conditions ##############
+0.0d0  1.0d0  0.0d0                        !p boundary condition at WEST face(alfa,beta,gamma)
+0.0d0  1.0d0  0.0d0                        !p boundary condition at EAST face(alfa,beta,gamma)
+0.0d0  1.0d0  0.0d0                        !p boundary condition at SOUTH face(alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !p boundary condition at NORTH face(alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                        !p boundary condition at BOTTOM face(alfa, beta, gamma)
+1.0d0  0.0d0  0.0d0                        !p boundary condition at TOP face(alfa, beta, gamma)
+
+!!!****initial partition topology****!!!
+2 2 1                                      !number of processors in x,y,z axis
+
+!!!****Perform load balance
+0                                          !0: dont perform load balance; 1: perform load balance
+.true.					     !true= use the virtual level in parallel, false= do not use teh virtual level in parallel
+
+!!#### output directory #########################
+"output"
+
+
+
+
+
+

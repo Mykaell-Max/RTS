@@ -1,0 +1,130 @@
+!! dpm input file. Readed in input_data_dpm subroutine
+
+!!!****DPM control parameters****!!!
+.false.                                             ! use_dpm [true|false].                             Default: false
+.false. 1.d0                                        ! dpm_subiter, dpm_dt_max:                          Turn on sub-iterations for particles, maximum time-step size for the dpm subiter
+0                                                   ! setnump:                                          Set number of particles: 0 - by mass flow rate, 1 - by value
+30.0d-3                                             ! dpm_mass_flow:                                    Mass flow rate of real particles 
+1 9999                                             	! dpm_nparticles, dpm_inject:                       Number of computational particles to be injected at each step, number of time steps to inject particles
+1                                                   ! nreal_part:                                       Number of real particles in one computacional particle 
+2                                                   ! diamdp:                                           Diameter distribution: 0 - constant, 1 - normal, 2 - log_normal 
+300.0d-6  50.0d-6                                   ! dpm_mean_diam, dpm_std_diam:                      Diameter distribution parameters [diameter mean, diameter standard deviation] *Choose values ​​in the same order of magnitude
+745.042756924d0                                     ! dpm_rho:                                          Specific mass *Or define expression in dpm_evap
+1.33065142465d-3                                    ! dpm_mu:                                           Dynamic viscosity 
+1                                                   ! initposd:                                         Initial position distribution: 0 - coordinates, 1 - circular inlet, 2 - rectangular inlet, 3 - annular inlet 
+0.0d0   0.032d0   0.032d0                           ! dpm_x0, dpm_y0, dpm_z0:                           Initial position by coordinates [x0, y0, z0]
+0.0d0   0.0d0   0.0d0  1.0d0  0.0d0   1.0d0         ! inlet_(x1,x2,y1,y2,z1,z2):                        Circular/rectangular inlet plane [x1,x2] x [y1,y2] x [z1,z2] *Just planes parallel to xy, xz, yz ...
+0.032d0   0.032d0   1.5d-3  0.0d0                   ! inlet_center_(1,2), inlet_length_(1,2):           Circular/rectangular inlet geometry: [center_pos1, center_pos2] / [diameter_ex/length_edge1, diameter_in/length_edge2]
+.false.  0  0.0d0   0.0d0   0.0d0   0.0d0           ! dpm_initall, volume_type, volume_(1,2,3,r):       Initiate a volume of particles by value: .true. or .false / 0 - Cylinder [pos_1, pos_2], 1 - Sphere [xc, yc, zc, r], 2 - parallelepiped [center_posY, length_edgeY]
+150.0d0   0.0d0   0.0d0                             ! dpm_(u0,v0,w0):                                   Initial mean velocities [u0, v0, w0]
+0.0d0   5.0d0   5.0d0                               ! dpm_(u0_,v0_,w0_):                                Initial standard deviation velocities [u0_, v0_, w0_]
+0.0d0   0.0d0   0.0d0                               ! dpm_omega_(x0,y0,z0):                             Initial angular velocities [omega_x0, omega_y0, omega_z0]
+1   1   1   0  1                                    ! dpm_forces(1,2,3,4,5):                            Considered forces: 0 - Deactivate, 1 - Activate [Weigth, Buoyancy, Shear Lift Force, Rotational Lift Force, virtual mass] *Drag always considered
+4                                                   ! dpm_coupling:                                     Coupling type: 1-way coupling, 2-way coupling, 4-way coupling (deterministic DPM model), 5-DEM and 6-Adaptative coupling type
+0                                                   ! dpm_collision_type                                Collision type: 0 - noone, 1- stochastic, 2- deterministic
+
+!!!****Domain Boundaries control parameters****!!
+2   2   1   1   2   2                               ! dpm_boundary(1,2,3,4,5,6):                        Condition type for domain boundaries: 0 - Deletion, 1 - Reflection, 2 - Periodic, 3 - Free_slip at [WEST, EAST, SOUTH, NORTH, BOTTOM, TOP]
+1.0d0                                               ! dpm_wall_restitution_coeff:                       Wall-particle coefficient of restitution
+0.0d0                                               ! dpm_wall_friction_coeff:                          Wall-particle coefficient of dynamic friction
+0  0.0d0                                            ! dpm_wall_roughness, std_roughness:                Roughness surface: 0 - no, 1 - yes / and standard deviation of roughness
+0                                                   ! dpm_ib_use:                                       Wall-particle collision with a immersed geometry: 0 - no, 1 - yes
+1                                                   ! dpm_imb_io:                                       Particle position related to the immersed geometry: outside = -1, inside = 1 
+
+!!!****Inter-particle collision model control parameters - 4-way coupling****!!
+1.0d0                                               ! dpm_restitution_coeff:                            Particles coefficient of restitution in 4-way coupling 
+0.0d0                                               ! dpm_friction_coeff:                               Particles coefficient of dynamic friction in 4-way coupling 
+
+!!!****DEM control parameters****!!!
+1                                                   ! dem_model:                                        1-Linear DEM model and 2-Monlinear DEM model
+4.0d6							                    ! dem_E:                                            Particle Young's modulus
+0.49d0							                    ! dem_poisson:                                      Particle poisson ratio
+0.3d0							                    ! dem_restcoef:                                     Particle restitution coefficient
+0.8d0							                    ! dem_fricstatcoef:                                 Particle static friction coefficient
+0.3d0							                    ! dem_fricrollcoef:                                 Particle rolling friction coefficient
+0.3d0							                    ! dem_dampviscratio:                                Particle rolling viscous damping ratio
+1.0d0                                               ! dem_cfl:                                          DEM Courant–Friedrichs–Lewy condition (CFL)
+
+!!!****Erosion model control parameters****!!!
+0        											! dpm_ib_erosion:                                   Erosion model: 0 - none, 1 - Oka et al. (2005)
+
+!!!****Dense model control parameters****!!!
+0   0                                               ! dpm_dense_model, choose_dense_model:              [0-off/1-on, 0-dpm/1-VOF]
+
+!!!****Droplet evaporation model control parameters****!!!
+1013250.0d0                                         ! dpm_p_amb:                                        Ambient pressure 
+300.0d0                                             ! dpm_T0:                                           Initial droplet temperature 
+2520.5d0                                            ! dpm_cp:                                           Liquid specific heat capacity *Or define expression in dpm_evap
+gri30.yaml                     	                ! dpm_cti_file:                                     CTI file 
+gas                                         	    ! dpm_cant_mech:                                    Cantera mechanism 
+"NC8H18:0.023, NC10H22:0.05, NC12H26:0.299, NC14H30:0.1, NC16H34:0.014, IC8H18:0.034, IC12H26:0.143, C7H8:0.052, C9H12_2:0.285"     !comp_droplet:      Initial droplet composition 
+3               	                                ! dpm_evap_model:                                   Evaporation model: 0 - None, 1 - CEM, 2 - NEQ, 3 - ASM 
+2        0                                          ! dpm_heat_model, dpm_radiation:                    Heating model: 0 - ITC, 1 - FTC, 2 - ETC ; Radiation: 0 - Deactivate, 1 - Activate
+2                                                   ! dpm_diff_model:                                   Diffusion model: 0 - None, 1 - FD, 2 - ED  
+20                                                  ! dpm_nLambda_T:                                    Number of terms in the series T(r,t) 
+20                                                  ! dpm_nLambda_Yl:                                   Number of terms in the series Yl,i(r,t) 
+
+!!!****Conversions Euler --> Lagrange parameters****!!!
+.false.                                             ! use_EulLag_trades:                                Use Conversions Euler --> Lagrange
+.false.  0.1d0                                      ! forced_eul2lag, fpos:                             Use forced conversion euler to lagrangian, position       
+50                                                  ! freq_Eul2Lag:                                     Number of time steps to convert Eulerian to Lagrangian 
+12.d0                                               ! cte_CutVol:                                       Cut volume - Eulerian to Lagrangian - cte multiplied by the finest dx*dy*dz
+.true.                                              ! use_shape_criteria:                               Use shape criteria - Herrmann (2010)
+.true.                                              ! use_berend_criteria_Eul2Lag:                      Use Berend filter criteria - Eulerian to Lagrangian
+1                                                   ! unperturbed:                                      1 - Ling unperturbed field; 2 - Berend unperturbed field
+1.d0                                                ! cte_distance_convE2L:                             Distance from IB NOT to convert - cte multiplied by the finest dx
+
+!!!****Conversions Lagrange --> Euler parameters****!!!
+.false.                                             ! use_LagEul_trades:                                Use Conversions Lagrange --> Euler
+50                                                  ! freq_Lag2Eul:                                     Number of time steps to convert Lagrangian to Eulerian
+-10.d0                                              ! cte_distance_convL2E:                             Distance from IB to convert - cte multiplied by the finest dx
+
+!!!****Droplet breakup model control parameters****!!!
+0.0261d0                                          	! dpm_sigma:                                        Surface tension (dpm_sigma)
+0        					                        ! dpm_breakup_model:                                Secondary breakup model: 0 - None, 1 - TAB, 2 - KHRT, 3 - SSD (dpm_breakup_model)
+
+!!!****dpm inlet test ****!!!
+.false.                                             ! test_dpm_inlet: 
+
+!!!****dpm n comp ****!!!
+1                                                   ! dpm_n_comp: 
+1                                                   ! dpm_n_layers:
+	
+!!!****dpm coolprop ****!!!
+.false.                                             ! use_yaws_fluid_properties:
+"Water"                                             ! yaws_fluid_names:
+.false.                                             ! use_coolprop:
+Water                                               ! dpm_coolprop_fluid:
+
+!!!****dpm liq props****!!!
+647.13                                              ! dpm_liq_Tcrit:
+220.55                                              ! dpm_liq_Pcrit:        
+0.325                                               ! dpm_liq_A_rho:
+0.27                                                ! dpm_liq_B_rho:
+0.23                                                ! dpm_liq_C_rho:        
+-22.417                                             ! dpm_liq_A_cp: 
+0.87697                                             ! dpm_liq_B_cp:
+-0.0025704                                          ! dpm_liq_C_cp: 
+2.4838E-06                                          ! dpm_liq_D_cp:        
+-0.35667                                            ! dpm_liq_A_k:
+0.005057                                            ! dpm_liq_B_k: 
+-6.1071E-06                                         ! dpm_liq_C_k:
+-11.6225                                            ! dpm_liq_A_mu:
+1.9490E03                                           ! dpm_liq_B_mu:
+2.1641E-02                                          ! dpm_liq_C_mu:
+-1.5990E-05                                         ! dpm_liq_D_mu: 
+	
+!!!****dpm surf props****!!!
+647.13                                              ! dpm_surf_Tcrit:
+54.0                                                ! dpm_surf_A_Lv:
+0.34                                                ! dpm_surf_B_Lv:
+65.026                                              ! dpm_surf_A_pv:
+-3.8188d3                                           ! dpm_surf_B_pv:
+-21.684                                             ! dpm_surf_C_pv:
+1.0387d-2                                           ! dpm_surf_D_pv:
+1.0206d-14                                          ! dpm_surf_E_pv:
+
+!!!****dpm lennard parameters****!!!
+.false.                                             !use_lennard: 
+3.458 3.621 6.27                                    !dpm_sigma:
+107.4 97.53 612.84                                  !dpm_epsilon:

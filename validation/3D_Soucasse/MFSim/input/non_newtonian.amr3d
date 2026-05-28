@@ -1,0 +1,67 @@
+!! Non-Newtonian input file. Readed in input_nnewt subroutine
+.false.           ! nnewt_fluid:                   Will work with non_newtonian fluid?
+
+!---------------- Commom parameters to all non-newtonian models ----------------!
+0.002d0             ! nnewt_K:                       Consistency index (Pa*s^n) for the non-newtonian fluid model
+0.75d0             ! nnewt_n:                       Flow index bahavior (dimensionless) for the non-newtonian fluid model
+0.0d0             ! nnewt_eta0:                    Zero-shear-rate (Pa*s) for the non-newtonian fluid model
+0.0d0             ! nnewt_etainf:                  Infinite-shear-rate (Pa*s) for the non-newtonian fluid model
+0.0d0             ! nnewt_lambda:                  Time constant (s) for the non-newtonian fluid model
+0.0d0             ! nnewt_a:                       Dimensionless parameter for the non-newtonian fluid model
+0.0d0             ! nnewt_yield:                   Yield Stress (Pa) for the non-newtonian fluid
+0.0d0             ! nnewt_Papanastasioun_n         Dimensionless coefficient of Papanastasiou suggestiond (only for models with yield stress, as Casson, Bingham, herschel-Bulkley and KL)
+
+!---------------- Strain Rate Tensor Magnitude (SRTM) -----------!
+1                 !SRTM_relation                   (options: 1 - SRTM=dsqrt(II_2S)    2 - SRTM=dsqrt(0.5d0 * II_2S)    3 - SRTM= vago    4 - SRTM=vago )
+
+!---------------- Power Law model ------------------------!
+.true.           ! nnewt_model_PL:                Power Law non-newtonian model? (Please, change 'nnewt_K'and 'nnewt_n' parameters)
+.false.           ! nnewt_model_PL_Uplimit:        Viscosity's Upper Limit activation? (Please, change the two following parameters)
+0.0d0             ! SRTM_Uplimit                   Upper SRTM limit (s^-1) 
+0.0d0             ! nnewt_visc_Uplimit             Upper viscosity limit (Pa.s)
+.false.           ! nnewt_model_PL_Downlimit:      Viscosity's Lower Limit activation? (Please, change the two following parameters)
+0.0d0             ! SRTM_Downlimit                 Lower SRTM limit (s^-1)  
+0.0d0             ! nnewt_visc_Downlimit           Lower viscosity limit (Pa.s)
+
+!---------------- Carreau model --------------------------! 
+.false.           ! nnewt_model_Carreau:           Carreau non-newtonian model? (Please, change 'nnewt_n', 'nnewt_eta0', 'nnewt_etainf' and 'nnewt_lambda' parameters)
+
+!---------------- Carreau-Yasuda model -------------------!
+.false.           ! nnewt_model_CY:                Carreau-Yasuda non-newtonian model? (Please, change 'nnewt_n', 'nnewt_eta0', 'nnewt_etainf', 'nnewt_lambda' and 'nnewt_a' parameters)
+
+!---------------- Cross model ----------------------------!
+.false.           ! nnewt_model_Cross:             Cross non-newtonian model? (Please, change 'nnewt_n', 'nnewt_eta0', 'nnewt_etainf' and 'nnewt_lambda' parameters)
+
+!---------------- Simplified Cross model -----------------!
+.false.           ! nnewt_model_SimpCross:         Simplified Cross non-newtonian model? ((Please, change 'nnewt_eta0', 'nnewt_etainf', 'nnewt_lambda' and 'nnewt_a' parameters)
+
+!---------------- Modified Cross model -------------------!
+.false.           ! nnewt_model_ModCross:          Modified Cross non-newtonian model? (Please, change 'nnewt_n', 'nnewt_eta0', 'nnewt_etainf', 'nnewt_lambda' and 'nnewt_a' parameters)
+
+!---------------- Herschel-Bulkley model -----------------!
+.false.           ! nnewt_model_HB:                Herschel-Bulkley non-newtonian model? (Please, change 'nnewt_n', 'nnewt_eta0' and 'nnewt_yield' parameters)
+
+!---------------- Bingham model --------------------------!
+.false.           ! nnewt_model_Bingham:           Bingham non-newtonian model? (Please, change 'nnewt_K'and 'nnewt_n' parameters)
+
+!---------------- Casson model ---------------------------!
+.false.           ! nnewt_model_Casson:            Casson non-newtonian model? (Please, change 'nnewt_eta0' and 'nnewt_yield' parameters)
+
+!---------------- Modified Casson model ------------------!
+.false.           ! nnewt_model_ModCasson:         Modified Casson non-newtonian model? (Please, change 'nnewt_K'and 'nnewt_n' parameters)
+
+!---------------- Powell-Erying model --------------------!
+.false.            ! nnewt_model_PE:                Powell-Erying non-newtonian model? (Please, change 'nnewt_eta0', 'nnewt_etainf' and 'nnewt_lambda' parameters)
+
+!---------------- Modified Powell-Erying model -----------!
+.false.           ! nnewt_model_ModPE:             Modified Powell-Erying non-newtonian model? (Please, change 'nnewt_eta0', 'nnewt_etainf', 'nnewt_lambda' and 'nnewt_a' parameters)
+
+!---------------- K-L model ------------------------------!
+.false.           ! nnewt_model_KL:                K-L non-newtonian model? (Please, change 'nnewt_n', 'nnewt_eta0', 'nnewt_a' and 'nnewt_yield' parameters)
+
+!---------------- Non-Newtonian VOF parameters ------------------------!
+.false.            ! nnewt_VOF:                     Is the VOF the non-Newtonian fluid?
+2                 ! nnewt_rho_int_l:               Interface interpolation method for rho on l<ltop (options: 1 - Arithmetic; 2 - Harmonic; 3 - Logarithmic)
+1                 ! nnewt_rho_int_ltop:            Interface interpolation method for rho on l=ltop (options: 1 - Arithmetic; 2 - Harmonic; 3 - Logarithmic)
+1                 ! nnewt_mu_int_l:                Interface interpolation method for mu on l<ltop (options: 1 - Arithmetic; 2 - Harmonic; 3 - Logarithmic)
+1                 ! nnewt_mu_int_ltop:             Interface interpolation method for mu on l=ltop (options: 1 - Arithmetic; 2 - Harmonic; 3 - Logarithmic)

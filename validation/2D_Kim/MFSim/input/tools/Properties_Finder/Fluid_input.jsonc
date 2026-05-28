@@ -1,0 +1,30 @@
+// -----------------------------------
+// Input File for GAS Properties Finder
+// -----------------------------------
+{
+    "Substance":{
+        // Examples:
+        // Air  : "O2:1.0, N2:3.76" "molar" cti=gri30.cti
+        "Composition":"O2:1.0 , N2:3.76", // string with chemical composition. Species separated by ',' fractions after ':'
+        "Fraction Type":"molar" // Can be 'mass' or 'molar'
+    },
+    
+    "Termodinamic State":{
+        "Temperature": 20.0, // [C]
+        "Pressure": 101325.0 // [Pa]
+    },
+    
+    "Properties":[
+        "rho", // [kg/m^3]
+        "mu", // [Pa s]
+        "cp", // [kJ/(kg K)]
+        "k", // [W/(m K)]
+        "c" // [m/s]
+    ],
+    
+    // File input for cantera.
+    // The standard file: 'gri30.cti' includes several combinations
+    // for GASES with the species: O  H  C  N  Ar
+    "cti_database":"lib/gri30.cti"
+    
+}

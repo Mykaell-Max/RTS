@@ -1,0 +1,31 @@
+!! vof input file. Readed in input_data_vof subroutines
+
+!########### VOF CL boundary conditions #############
+0                                           !Tvof%alfaBC(1):        Contact Line at WEST   face (0= Don't use; 1= Use)
+0                                           !Tvof%alfaBC(2):        Contact Line at EAST   face (0= Don't use; 1= Use)
+0                                           !Tvof%alfaBC(3):        Contact Line at SOUTH  face (0= Don't use; 1= Use)
+0                                           !Tvof%alfaBC(4):        Contact Line at NORTH  face (0= Don't use; 1= Use)
+0                                           !Tvof%alfaBC(5):        Contact Line at BOTTOM face (0= Don't use; 1= Use)
+0                                           !Tvof%alfaBC(6):        Contact Line at TOP    face (0= Don't use; 1= Use)
+!########### VOF boundary conditions #############
+0.0d0  1.0d0  0.0d0                         !vofbc_w%(alfa_bc,beta_bc,gamma_bc):        vof boundary condition at WEST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !vofbc_e%(alfa_bc,beta_bc,gamma_bc):        vof boundary condition at EAST face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !vofbc_s%(alfa_bc,beta_bc,gamma_bc):        vof boundary condition at SOUTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !vofbc_n%(alfa_bc,beta_bc,gamma_bc):        vof boundary condition at NORTH face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !vofbc_b%(alfa_bc,beta_bc,gamma_bc):        vof boundary condition at BOTTOM face (alfa, beta, gamma)
+0.0d0  1.0d0  0.0d0                         !vofbc_t%(alfa_bc,beta_bc,gamma_bc):        vof boundary condition at TOP face (alfa, beta, gamma)
+
+!!!****VOF control parameters****!!!
+.false.                                     !vof_twicefine_model:               vof twice fine model
+.false.                                     !mm_compatibility:                  mass-momentum compatibility
+"CSF"					                    !vof_surface_tension_model:         CSF or SSF
+2				                            !vof_curvature_model:               vof curvature model: "height_function=1; "shirani=2"; "twentysevencells=3"; "paraboloid=4"; "least_square=5"; "exact=6"
+.true.					                    !vof_smooth:                        use the vof smooth to evaluate the density and viscosity: .true. or .false. (vof_smooth)
+1					                        !Tvof%nsurfaces:                    number of bodys to initialize
+
+1.50d0  1.50d0  2.95d0   0.10d0             !vof_xc,vof_yc,vof_zc,vof_raio:     xc,yc,zc,raio 
+4                                           !Tvof%initSurface:                  What Surface: sphere=0,ellipsoid=1,torus=2,tank=3,halfSphere=4
+
+30 0 1                                      !Tvof%(thetaE,cpModel,gamma_max):       Contact angle; Contact Angle model: 0=Static; 1=Yokoi; 2=Shikmurzaev; gammaMax
+1                                           !vof_init_model:                        vof_init_model: 1=sussman, 2=points, 3=vofi
+.false.                                     !vof_check_inconsistent_points:         vof_check_inconsistent_points: flag to indicates if MFSim should identify VoF inconsistent points

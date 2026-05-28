@@ -1,0 +1,18 @@
+remeshSequence   coarsen refine
+tolVolume        0.01
+minVertexAngle   30.
+maxVertexAngle   30
+maxElementAngle  30.
+minElementAngle  30.
+referenceLength  0.01
+tolRefinement    0.2
+tolCoarsening   -0.2
+minEdgeLength    0.008
+maxEdgeLength    0.01
+remeshIter       1
+saveIter         1
+bkpIter          10000
+timeStep         0.001
+simTime          1.0
+volRecovery      1
+

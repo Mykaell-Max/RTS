@@ -1,0 +1,22 @@
+!! compressible input file. Readed in input_data_compressible subroutine
+
+!!!****Compressible control parameters****!!!
+.false.                             !compresFlow:           Simulate compressible flow 
+
+.false.                             !cont_compr:            Continuous phase is compressible 
+.false.                             !disp_compr:            Disperse phase is compressible   
+
+287.7d0                             !R_gas_c:               Ideal gas constant for continuous phase 
+276.5d0                             !R_gas_d:               Ideal gas constant for disperse phase 
+
+1.4d0                               !gamma_compr_c:         gamma of gas for continuous phase 
+1.2d0                               !gamma_compr_d:         gamma of gas for disperse phase 
+
+
+!!!!*****Boundary conditions*****!!!!
+.false.                             !waveTrans(1):          Wave transmissive B.C. 
+.false.                             !waveTrans(2):          Wave transmissive B.C. 
+.false.                             !waveTrans(3):          Wave transmissive B.C. 
+.false.                             !waveTrans(4):          Wave transmissive B.C. 
+.false.                             !waveTrans(5):          Wave transmissive B.C. 
+.false.                             !waveTrans(6):          Wave transmissive B.C. 

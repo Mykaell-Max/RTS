@@ -1,0 +1,37 @@
+!! ib input file. Readed in input_data_ib subroutine
+
+!!!!*****Immersed Boundary parameters****!!!
+5 0.001d0                          !maxc, rigid_epslon:                                    maximum numbem of cycles in the direct forcing scheme (maxc), and eslon of directing force (rigid_epslon) - for rigid body
+1                                   !kindIBFile:                                            kind of file: '1-stl ascii file',  '2-stl2amr file', '3-manual file' 
+1                                   !ib_n_surfaces:                                         number of immersed boundaries 
+.false.                             !ib_gc_log
+.false.                             !ib_gc_log_scalar
+
+"esfera.stl"                        !ib_path:                                               path and name of immersed boundary files
+.false.                             !move_IB:                                               .true. if the IB is in movement or .false. if isn't in movement
+0.d0 0.d0 0.d0                      !u_imp,v_imp,w_imp:                                     Input linear velocity
+0.d0 0.d0 0.d0                      !w1_imp,w2_imp,w3_imp:                                  Input angular velocity
+0.d0 0.d0 0.d0                      !x_imp,y_imp,z_imp:                                     Reference position for rotation
+.false.                             !ib_GC_do_primary_mark
+5                                   !level_imp: ib level
+
+1                                   !kindIntIB:                                             kind of the interp./distrib. function: 1-hat, 2-Gauss, 3-cubic, 4-Roma/Peskin/Berger (kindIntIB)
+1                                   !stratLagVol:                                           strategy for the construction of the lagrangian volume [1 -> (L^2*sqrt(3)/4)*L = dx^3]; [2 -> (L^2*sqrt(3)/4)*dx = dx^3] (stratLagVol)
+.false.                             !IB_log_make_first_output:                              print pvd, pvtp, and vtp first time step.
+.false.                             !IB_log_make_output:                                    print pvd, pvtp, and vtp EVERY time step.
+
+!!!******IB indicator funcyion - normal must be pointed at inner region of  immersed boundary
+.true. 2                            !IB_indicator_function, IB_indicator_function_option:   active the IB indicator function that is 1 in the inner region and zero outter. Option: 1 (eliptic equation), 2 (distance with sign)
+.false.                             !external_to_IB:                                        Is the flow external to the IBs?
+
+!!!!***** Compressible parameters****!!!
+.false.                             !freeSlipIB:                                            use free slip boundary condition 
+
+!!!!*****Scalar Immersed Boundary parameters****!!!
+.false.                             !termicalIB:                                            Use scalar immersed boundary 
+.false.                             !scalarIB:                                              Use scalar immersed boundary 
+1     0.0d0                         !type_ib_term,scb_ib_term:                              Type of Temperature BC (1-dirichlet,2-neumann,3-robin) and impose volue
+1     0.0d0                         !type_ib_sca,scb_ib_sca:                                Type of Scalar BC (1-dirichlet,2-neumann,3-robin) and impose volue
+
+
+

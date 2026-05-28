@@ -1,0 +1,74 @@
+!! structure/fsi input file. Readed in input_beam_fsi, input_data_fsi, input_plate_fsi and input_solid_fsi subroutines
+
+!########## FSI common config - input_data_fsi subroutine ##############
+.false.                         ! use_beam_fsi:                     Use Beam FSI modeling 
+.false.                         ! use_plate_fsi:                    Use Plate FSI modeling 
+.false.                         ! use_solid_fsi:                    Use Solid FSI modeling 
+
+!########## FSI user's parameters ##############
+
+0.0d0                           ! t_fsi:                                                FSI calculations Start time 
+1                               ! ct_to_do_fsi:                                         time steps to do FSI calculations
+
+!########## FSI Coupling ##############
+
+3                               ! st_time_method:                                       Time discretization method. 1: Runge-Kutta 4th order (rk_44); 2: Runge-Kutta-Fehlberg method (rkf45); 3: Runge-Kutta-Dormand–Prince method (rkdp54)
+.false.                         ! is_strong:                                            Use Strong Coupling 
+19                              ! max_it_fsi_sc:                                        Max. number of iterations on Strong Coupling loop
+1.0d-5                          ! tol_fsi_sc:                                           Residue for Strong Coupling convergence
+
+!############ Pluck FSI ################
+
+.false.                         ! use_pluck_test:                                       use or not Pluck test 
+1.0d4                           ! F_pluck:                                              Pluck Force magnitude 
+0.0d0 -1.0d0 0.0d0              ! F_pluck_dir(1),F_pluck_dir(2),F_pluck_dir(3):         Pluck Force direction 
+0                               ! itp_Start:                                            FSI iteration to start force aplication (itp_Start)
+10                              ! itp_delta:                                            Number of time steps during Force aplication. Uses a cossin curve. (itp_delta)
+340                             ! ele_pluck:                                            Structural element to apply the force (ele_pluck)
+
+!############ Beam FSI - input_beam_fsi subroutine ################
+
+0                               ! num:                                              Number of Beam structures
+"Li_Lee_80nodes_W.bdf"          ! FEA_data(n)%mesh_file:                            Beam NASTRAN file name 'geo/' 
+1                               ! FEA_data(n)%ib_number:                            Associated Immersed Boundary Number
+0.064                           ! FEA_data(n)%input_h:                              Caracteristic Lenght for IB Mapping 
+11                              ! FEA_data(n)%Theory:                               Beam Theory: 11-Euler-Bernoulli, 12-Timoshenko Circular, 13-Timoshenko Rectangular 
+1.d-3    1.d-7                  ! FEA_data(n)%alpha, FEA_data(n)%beta:              Damping matrix constants 
+6                               ! FEA_data(n)%nmodes:                               Number of modes to simulate 
+0.d0                            ! FEA_data(n)%Faxial:                               Axial Force 
+0.d0  0.d0                      ! FEA_data(n)%inc_mass,  FEA_data(n)%inc_moment:    Internal Mass [Kg/m] and Mass Moment of inertia (R1^2 + R2^2) [m^2] to implicit mass correction 
+.false.                         ! FEA_data(n)%use_expl_mass:                        Use explicit mass correction 
+0.d0  0.d0                      ! FEA_data(n)%corr_mass,  FEA_data(n)%corr_moment:  Internal Mass [Kg/m] and Mass Moment of inertia (R1^2 + R2^2) [m^2] to explicit mass correction 
+.true.                          ! FEA_data(n)%Weight_flag:                          Choose if initial displacement have own weight (Weight_flag)
+2                               ! FEA_data(n)%n_bcs:                                Number of nodes with Boundary conditions (n_bcs)
+1.d9  1.d9  1.d9                ! FEA_data(n)%KSup(i,1:3):                          Linear Stiffness of the flexible support (Kx, Ky, Kz)
+1.d9  1.d9  1.d9                ! FEA_data(n)%KSup(i,4:6):                          Rotational Stiffness (Krx, Kry, Krz)
+1.d2  1.d2  1.d2                ! FEA_data(n)%DSup(i,1:3):                          Linear damping of the flexible support (Dx, Dy, Dz)
+1.d2  1.d2  1.d2                ! FEA_data(n)%DSup(i,4:6):                          Rotational damping of the flexible support (Drx, Dry, Drz)
+1.d9  1.d9  1.d9                ! FEA_data(n)%KSup(i,1:3):                          Linear Stiffness of the flexible support (Kx, Ky, Kz)
+1.d9  1.d9  1.d9                ! FEA_data(n)%KSup(i,4:6):                          Rotational Stiffness (Krx, Kry, Krz)
+1.d2  1.d2  1.d2                ! FEA_data(n)%DSup(i,1:3):                          Linear damping of the flexible support (Dx, Dy, Dz)
+1.d2  1.d2  1.d2                ! FEA_data(n)%DSup(i,4:6):                          Rotational damping of the flexible support (Drx, Dry, Drz)
+
+!############ Plate FSI - input_plate_fsi subroutine ################
+
+0                               ! num:                                      Number of Plate structures
+"Nastran.bdf"                   ! FEA_data(n)%mesh_file:                    Plate NASTRAN file name 
+1                               ! FEA_data(n)%ib_number:                    Associated Immersed Boundary Number 
+21                              ! FEA_data(n)%Theory:                       Plate Theory: 21-Kirchoff, 22-Mindlin, 23-Shell
+1.000d-3                        ! FEA_data(n)%input_h:                      Caracteristic Lenght for IB Mapping 
+0.d0    0.d0                    ! FEA_data(n)%alpha, FEA_data(n)%beta:      Damping matrix constants 
+5                               ! FEA_data(n)%nmodes:                       Number of modes to simulate 
+.false.                         ! FEA_data(n)%Weight_flag:                  Choose if initial displacement have own weight 
+
+!############ Solid FSI - input_solid_fsi subroutine ################
+
+1                               ! num:                                      Number of Solid structures
+1                               ! FEA_data(n)%mesh_forma:                   Mesh file format: 1-.bdf NASTRAN; 2-.cfx5 Fluent
+"line_full_concrete_nnd.bdf"    ! FEA_data(n)%mesh_file:                    Mesh file name 
+1                               ! FEA_data(n)%ib_number:                    Associated Immersed Boundary Number 
+32                              ! FEA_data(n)%Theory:                       Type of element: 31: Hexa-8 standard element; 32: Hexa-8 With extra shape function
+10.000d-3                       ! FEA_data(n)%input_h:                      Caracteristic Lenght for IB Mapping 
+0.d0    0.d0                    ! FEA_data(n)%alpha, FEA_data(n)%beta:      Damping matrix constants 
+20                              ! FEA_data(n)%nmodes:                       Number of modes to simulate
+.true.                          ! FEA_data(n)%Weight_flag:                  Choose if initial displacement have own weight 

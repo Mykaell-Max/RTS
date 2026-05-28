@@ -1,0 +1,65 @@
+!!!!Name of AMR3d basic input file!!!
+"./input.amr3d"
+
+!!!Name of VOF Model input file!!!
+"./vof.amr3d"
+
+!!!Name of IB Model input file!!!
+"./ib.amr3d"
+
+!!!Name of scalar equation basic input file!!!
+"./scalar.amr3d"
+
+!!!Name of reaction input file!!!
+"./reaction.amr3d"
+
+!!!Name of probesSTL basic input file!!!
+"./probesSTL.amr3d"
+
+!!!Name of probes basic input file!!!
+"./probes.amr3d"
+
+!!!Name of turbulence models basic input file!!!
+"./turbulence.amr3d"
+
+!!!Name of energy equation input file!!!
+"./energy.amr3d"
+
+!!!Name of Fluid-structure interaction input file!!!
+"./structure.amr3d"
+
+!!!Filename of the post processing input file!!!
+"./postproc.amr3d"
+
+!!!Name of Discrete Phase Model input file!!!
+"./dpm.amr3d"
+
+!!!Name of Compressible input file!!!
+"./compressible.amr3d"
+
+!!!Name of Front-Tracking input file!!!
+"./FT/ft.amr3d"
+
+!!!Name of refinement region input file!!!
+"./refinement_region.amr3d"
+
+!!!Name of external BC input file!!!
+"./externalBC.amr3d"
+
+!!!Name of bc functions input file!!!
+"./bc_functions.f90"
+
+!!!Name of composedBC input file!!!
+"./composedBC.amr3d"
+
+!!!Name of corner input file!!!
+"./corner.amr3d"
+
+!!! Name of udf input file!!!!
+"./udf.f90"
+
+!!! Name of non-newtonian input file!!!!
+"./non_newtonian.amr3d"
+
+!!!Name of radiation input file!!!
+"./radiation.amr3d"

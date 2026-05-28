@@ -1,0 +1,8 @@
+#FrontTrackingInputFile
+test_case shear_flow_cpt
+advection_scheme eul_1st_order
+mftl_input_file master_file.mftl
+mftl_param_file case_file_parameters.mftl
+cpt_param_file ft_cpt_param_file.mftl
+time_step 0.0001
+remesh_interval 10
