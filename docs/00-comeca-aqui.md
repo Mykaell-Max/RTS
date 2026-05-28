@@ -435,13 +435,14 @@ ser **a maior parte do tempo total**.
 
 ## 9. Por que Querem Que Você Otimize Isso
 
-### 9.1 Os 3 problemas concretos
+### 9.1 Os 4 problemas concretos
 
 | Problema | Quem sente | Sintoma |
 |----------|-----------|---------|
-| **Tempo** | Pesquisador esperando resultado | Simulação demora dias |
-| **Memória** | Sistema | Estoura RAM em casos 256³ (~90 GB de IG) |
-| **Escalabilidade** | Cluster ocioso | Mais cores não ajuda |
+| 🐢 **Tempo do solver** | Pesquisador esperando resultado | Simulação demora dias |
+| 💾 **Memória** | Sistema | Estoura RAM em casos 256³ (~90 GB de IG) |
+| 📉 **Escalabilidade** | Cluster ocioso | Mais cores não ajuda no solver |
+| 🗺️ **Mapeamento de malha** | Toda atualização do AMR | Varre malha RTS inteira a cada patch (ver §9.3) |
 
 ### 9.2 As soluções possíveis (em linguagem de programador)
 
@@ -453,6 +454,98 @@ ser **a maior parte do tempo total**.
 
 Para nós: queremos primeiro **OpenMP** (acelera dentro de um nó) e depois **MPI por
 decomposição de domínio** (acelera entre nós). É o que os outros docs vão descrever.
+
+### 9.3 O 4º problema (separado): "blocão" no mapeamento de malha
+
+Esse problema não é do **solver** do RTS — é da **camada de cola** entre MFSim e RTS,
+especificamente na rotina `update_interp_map` (arquivo `rad_interface.f90` do wrapper
+dentro do MFSim).
+
+#### Por que existem duas malhas
+
+- **MFSim** usa **AMR** (malha adaptativa): regiões interessantes (chama) têm células
+  pequenas, regiões chatas (ar parado) têm células grandes. Internamente, são "patches"
+  de tamanhos variados organizados em níveis.
+- **RTS** usa **malha cartesiana uniforme**: todas as células do mesmo tamanho — um
+  "blocão" único e regular.
+
+Para passar dados entre os dois é preciso **mapear** quais células do RTS correspondem
+a quais pontos de quais patches do MFSim.
+
+#### Como o código mapeia hoje (ineficiente)
+
+```python
+# pseudocódigo do update_interp_map atual
+for cada_nivel_AMR:
+    for cada_patch_do_nivel:
+        # Para cada patch, varre TODA a malha do RTS de novo
+        for i in 1..nxi:
+            for j in 1..nyi:
+                for k in 1..nzi:
+                    if ponto_(i,j,k)_está_dentro_do_patch():
+                        guarda(i, j, k, patch)
+```
+
+Complexidade: **O(N_patches × N_pontos_RTS)**.
+
+Em números reais:
+- N_patches: centenas a milhares (AMR refina muito)
+- N_pontos_RTS: 256³ ≈ **16 milhões**
+- Total: dezenas de **bilhões** de comparações
+- Roda a cada atualização do AMR ⇒ **gargalo perceptível**
+
+#### Analogia
+
+Imagina 500 quiosques num shopping (patches AMR) e uma planta baixa do shopping
+quadriculada em 16 milhões de quadradinhos (malha RTS). Para preencher uma tabela de
+"qual quadradinho pertence a qual quiosque", o código atual faz:
+
+> Para cada quiosque: pergunte aos 16 milhões de quadradinhos "você está aqui?"
+
+São **8 bilhões de perguntas**. Mas o shopping é quadriculado regular — você sabe
+matematicamente que um quiosque de x=10m a x=20m só pode conter os quadradinhos de
+índice `i=100..200`. **Não precisava perguntar pros outros.**
+
+#### A solução (aritmética de índices)
+
+Aproveitar que a malha RTS é uniforme com espaçamento conhecido (`dx, dy, dz`):
+
+```python
+# pseudocódigo otimizado
+for cada_patch:
+    # patch ocupa região física [x_min, x_max] × [y_min, y_max] × [z_min, z_max]
+    i_min, i_max = floor(x_min/dx)+1, ceil(x_max/dx)+1
+    j_min, j_max = floor(y_min/dy)+1, ceil(y_max/dy)+1
+    k_min, k_max = floor(z_min/dz)+1, ceil(z_max/dz)+1
+
+    # Varre só o bloquinho que o patch ocupa
+    for i in i_min..i_max:
+        for j in j_min..j_max:
+            for k in k_min..k_max:
+                guarda(i, j, k, patch)
+```
+
+Complexidade nova: **O(N_pontos_RTS)** total (cada ponto é tocado ~uma vez).
+
+| Cenário | Antes | Depois | Speedup |
+|---------|-------|--------|---------|
+| 500 patches, 16M pontos | 8 bilhões op | 16 milhões op | ~**500×** |
+
+#### Por que ainda não foi feito?
+
+Especulação razoável: funcionava (lento, mas funcionava); a pessoa que escreveu não
+quis assumir grid uniforme; o custo só aparece em casos grandes; e quem mexe nesse
+arquivo do MFSim é uma equipe diferente da que cuida do RTS.
+
+#### Onde isso entra no plano
+
+Diferente dos outros 3 problemas, **a correção desse não exige paralelização nenhuma**
+— é só refatorar a rotina `update_interp_map`. É um ganho **independente** que pode ser
+feito em paralelo com o trabalho principal.
+
+> ⚠️ **Atenção:** esse arquivo (`rad_interface.f90`) está **no repositório do MFSim**,
+> não neste repositório do RTS standalone. Para corrigir é preciso acesso ao código
+> do MFSim. Vamos confirmar com a equipe se temos esse acesso.
 
 ---
 
@@ -720,13 +813,18 @@ flowchart TB
     style Interp fill:#ccffcc
 ```
 
-### 14.5 Os 3 problemas concretos, lado a lado
+### 14.5 Os 4 problemas concretos, lado a lado
 
 | Problema | Onde acontece | Sintoma observável | Quem sofre |
 |----------|---------------|--------------------|-----------| 
-| 🐢 **Tempo** | `rtesolve` no Rank 0 | Simulação demora horas/dias | Pesquisador |
+| 🐢 **Tempo do solver** | `rtesolve` no Rank 0 | Simulação demora horas/dias | Pesquisador |
 | 💾 **Memória** | `allocate(IG)` em TODO rank | RAM estoura em casos grandes (até 90 GB) | Sistema |
 | 📉 **Não escala** | `rtesolve` é serial | Adicionar mais cores não acelera | Cluster ocioso |
+| 🗺️ **Mapeamento "blocão"** | `update_interp_map` (MFSim wrapper) | Varre 16M células × N_patches por update | Toda atualização do AMR |
+
+> Os 3 primeiros são **do solver RTS** — resolvem-se paralelizando o RTS.
+> O 4º é **da cola MFSim↔RTS** — resolve-se com aritmética de índices (ver §9.3).
+> Os dois trabalhos são independentes e podem acontecer em paralelo.
 
 ### 14.6 Como queremos que fique (objetivo)
 
