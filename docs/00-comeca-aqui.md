@@ -230,15 +230,121 @@ Por isso casos realistas de combustão são 5× mais caros.
 
 ---
 
-## 6. O Que é o MFSim?
+## 6. Parêntesis Importante — O Que é MPI e o Que é um "Rank"?
 
-### 6.1 Resumo de uma linha
+Antes de seguir, precisamos definir esses dois termos porque vão aparecer o tempo todo.
+
+### 6.1 MPI em uma frase
+
+**MPI** (*Message Passing Interface*) é o padrão usado para programar com **vários
+processos** rodando ao mesmo tempo, possivelmente em **máquinas diferentes** (cluster).
+É a tecnologia clássica de HPC (High Performance Computing).
+
+### 6.2 O que é um "rank"
+
+Quando você roda um programa MPI assim:
+
+```bash
+mpirun -n 4 ./meu_programa
+```
+
+**4 cópias do mesmo programa rodam simultaneamente**, cada uma como um **processo
+separado** do sistema operacional. Para se distinguirem, cada cópia recebe um **ID
+único de 0 até N-1** — esse ID é o **rank**.
+
+```
+   Rank 0       Rank 1       Rank 2       Rank 3
+   ┌────┐       ┌────┐       ┌────┐       ┌────┐
+   │ P  │       │ P  │       │ P  │       │ P  │     ← 4 cópias do
+   │ R  │       │ R  │       │ R  │       │ R  │       MESMO programa
+   │ O  │       │ O  │       │ O  │       │ O  │       rodando em paralelo
+   │ G  │       │ G  │       │ G  │       │ G  │
+   └────┘       └────┘       └────┘       └────┘
+     │            │            │            │
+     └────────────┴────────────┴────────────┘
+              comunicam-se por mensagens
+            (MPI_Send, MPI_Recv, MPI_Bcast...)
+```
+
+> 💡 **Analogia:** pensa em microsserviços. Cada microsserviço (rank) tem sua própria
+> memória, é independente, e conversa com os outros pela rede. Em MPI a "rede" pode ser
+> RAM compartilhada (mesma máquina) ou Infiniband/Ethernet (cluster), mas o modelo de
+> programação é o mesmo.
+
+### 6.3 Como cada cópia sabe quem ela é?
+
+Logo no início, cada processo pergunta pro MPI: "qual é o meu rank?"
+
+```fortran
+integer :: meu_rank, total_ranks
+call MPI_Comm_rank(MPI_COMM_WORLD, meu_rank, ierr)
+call MPI_Comm_size(MPI_COMM_WORLD, total_ranks, ierr)
+
+! Num run com 4 processos:
+!   meu_rank vai ser 0, 1, 2 ou 3 (cada cópia recebe um)
+!   total_ranks vai ser 4 em todas
+```
+
+E aí cada um pode se comportar diferente baseado no rank:
+
+```fortran
+if (meu_rank == 0) then
+    ! Eu sou o "chefe" — coordeno, junto resultados, escrevo arquivo
+else
+    ! Eu sou um "trabalhador" — faço minha parte e mando pro chefe
+end if
+```
+
+### 6.4 Convenção: Rank 0 = "root" = chefe
+
+Não é regra técnica, é só convenção: **o rank 0 costuma ser o coordenador**. Ele:
+- Lê arquivos de configuração
+- Imprime no terminal
+- Coleta resultados parciais dos outros
+- Escreve o arquivo de saída
+
+No nosso problema, é exatamente o Rank 0 que hoje executa o RTS sozinho — é o "chefe"
+e ficou sobrecarregado.
+
+### 6.5 MPI vs Threads (OpenMP) — não confunda
+
+| | OpenMP (threads) | MPI (processos) |
+|---|------------------|-----------------|
+| Memória | **Compartilhada** entre threads | **Separada** por processo |
+| Comunicação | Variáveis em comum | **Mensagens explícitas** |
+| Onde roda | Mesma máquina | Pode estar em máquinas diferentes |
+| ID do "trabalhador" | Thread ID (`omp_get_thread_num`) | **Rank** (`MPI_Comm_rank`) |
+| Esforço típico | Adicionar pragmas em loops | Reestruturar a aplicação |
+| Escala até | Cores de uma máquina (1-128) | Cores de um cluster (milhares) |
+
+> Os dois podem ser combinados: **MPI inter-nó + OpenMP intra-nó** (paralelismo híbrido).
+> É o que vamos buscar no final.
+
+### 6.6 Aplicado ao nosso caso
+
+Quando o MFSim roda em **128 cores** de um cluster, são **128 processos MPI** simultâneos,
+cada um com seu rank de 0 a 127. Cada um:
+- Tem **na memória só uma fatia** da câmara de combustão (digamos, 1/128 do volume)
+- Calcula o fluido na sua fatia
+- Manda/recebe mensagens dos vizinhos quando precisa
+
+Quando chega a hora da radiação, os ranks 1 a 127 mandam suas fatias para o rank 0
+(via `MPI_REDUCE`), **ficam parados**, o rank 0 monta o domínio inteiro na memória e
+roda o RTS sozinho, depois manda o resultado de volta para todos (via `MPI_BCAST`).
+
+> 🎯 **Esse é o gargalo que queremos eliminar.**
+
+---
+
+## 7. O Que é o MFSim?
+
+### 7.1 Resumo de uma linha
 
 **MFSim** é um **simulador CFD desenvolvido pelo MFLab da UFU** que simula o fluido
 (velocidade, pressão, temperatura, combustão). É um código grande, em produção, e
 já é **paralelo via MPI**.
 
-### 6.2 O que MFSim faz e o que NÃO faz
+### 7.2 O que MFSim faz e o que NÃO faz
 
 | Faz | Não faz bem (sozinho) |
 |-----|----------------------|
@@ -250,7 +356,7 @@ já é **paralelo via MPI**.
 Para a parte radiativa, o MFSim **chama o RTS como módulo externo**. Esse é o
 "acoplamento" que o relatório descreve.
 
-### 6.3 Por que separar?
+### 7.3 Por que separar?
 
 Filosofia de software clássica: **separação de responsabilidades**. CFD e radiação são
 problemas distintos com técnicas distintas. Fazendo módulos separados:
@@ -262,7 +368,7 @@ problemas distintos com técnicas distintas. Fazendo módulos separados:
 > 💡 É a mesma razão pela qual sua aplicação web não implementa o próprio sistema de
 > banco de dados — usa Postgres. Aqui MFSim "usa" RTS como Postgres da radiação.
 
-### 6.4 AMR — Adaptive Mesh Refinement (pra contextualizar)
+### 7.4 AMR — Adaptive Mesh Refinement (pra contextualizar)
 
 MFSim usa malha **adaptativa**: regiões interessantes (ex.: dentro da chama) têm
 células pequenas, regiões "chatas" (ar parado longe) têm células grandes. Isso é o
@@ -273,9 +379,9 @@ campos da malha do MFSim para a malha do RTS e vice-versa.
 
 ---
 
-## 7. Como MFSim e RTS Conversam Hoje
+## 8. Como MFSim e RTS Conversam Hoje
 
-### 7.1 O fluxo simplificado
+### 8.1 O fluxo simplificado
 
 ```mermaid
 sequenceDiagram
@@ -292,7 +398,7 @@ sequenceDiagram
     MFSim->>MFSim: cada rank atualiza sua fatia
 ```
 
-### 7.2 Em termos de programador
+### 8.2 Em termos de programador
 
 Hoje a integração funciona assim, simplificando:
 
@@ -327,9 +433,9 @@ ser **a maior parte do tempo total**.
 
 ---
 
-## 8. Por que Querem Que Você Otimize Isso
+## 9. Por que Querem Que Você Otimize Isso
 
-### 8.1 Os 3 problemas concretos
+### 9.1 Os 3 problemas concretos
 
 | Problema | Quem sente | Sintoma |
 |----------|-----------|---------|
@@ -337,7 +443,7 @@ ser **a maior parte do tempo total**.
 | **Memória** | Sistema | Estoura RAM em casos 256³ (~90 GB de IG) |
 | **Escalabilidade** | Cluster ocioso | Mais cores não ajuda |
 
-### 8.2 As soluções possíveis (em linguagem de programador)
+### 9.2 As soluções possíveis (em linguagem de programador)
 
 | Abordagem | O que é, em código | Esforço |
 |-----------|-------------------|---------|
@@ -350,7 +456,7 @@ decomposição de domínio** (acelera entre nós). É o que os outros docs vão 
 
 ---
 
-## 9. Glossário de Programador
+## 10. Glossário de Programador
 
 Tradução dos termos físicos para conceitos que você já conhece:
 
@@ -379,7 +485,7 @@ Tradução dos termos físicos para conceitos que você já conhece:
 
 ---
 
-## 10. Quem é Quem nos Arquivos do RTS (versão simplificada)
+## 11. Quem é Quem nos Arquivos do RTS (versão simplificada)
 
 Os arquivos em `sources/` agrupados por papel:
 
@@ -407,7 +513,7 @@ Os arquivos em `sources/` agrupados por papel:
 
 ---
 
-## 11. Pra Onde Ir Agora
+## 12. Pra Onde Ir Agora
 
 Agora você está pronto para os outros docs sem ficar perdido:
 
@@ -419,7 +525,7 @@ Agora você está pronto para os outros docs sem ficar perdido:
 
 ---
 
-## 12. Resposta a Perguntas Frequentes
+## 13. Resposta a Perguntas Frequentes
 
 **P: Eu preciso entender a física pra otimizar o código?**
 R: Não. Você precisa entender o **fluxo de dados** (quem lê o quê, quem escreve o quê,
@@ -455,12 +561,12 @@ foi resolvida antes — seja pela equipe, seja pela literatura de transporte de 
 
 ---
 
-## 13. Resumo Visual — Como Funciona Hoje e Onde Está o Problema
+## 14. Resumo Visual — Como Funciona Hoje e Onde Está o Problema
 
 Esta seção fecha o documento amarrando tudo num único quadro mental. Se você lembrar só
 desta parte, já consegue acompanhar as discussões técnicas.
 
-### 13.1 Os atores
+### 14.1 Os atores
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -483,7 +589,7 @@ desta parte, já consegue acompanhar as discussões técnicas.
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 13.2 Como funciona hoje (timeline)
+### 14.2 Como funciona hoje (timeline)
 
 ```mermaid
 gantt
@@ -528,7 +634,7 @@ gantt
 > Repare que durante o RTS solver (o bloco mais longo), **só o Rank 0 está trabalhando**.
 > Em um cluster de 128 cores, 127 ficam parados.
 
-### 13.3 Visão espacial do problema
+### 14.3 Visão espacial do problema
 
 ```
 ETAPA 1: MFSim rodando (todos trabalham em paralelo) ✅
@@ -584,7 +690,7 @@ ETAPA 4: manda resultado pra todo mundo (BCAST)
 ETAPA 5: volta ao MFSim em paralelo (volta ao normal) ✅
 ```
 
-### 13.4 Onde exatamente está o problema (mapa)
+### 14.4 Onde exatamente está o problema (mapa)
 
 ```mermaid
 flowchart TB
@@ -614,7 +720,7 @@ flowchart TB
     style Interp fill:#ccffcc
 ```
 
-### 13.5 Os 3 problemas concretos, lado a lado
+### 14.5 Os 3 problemas concretos, lado a lado
 
 | Problema | Onde acontece | Sintoma observável | Quem sofre |
 |----------|---------------|--------------------|-----------| 
@@ -622,7 +728,7 @@ flowchart TB
 | 💾 **Memória** | `allocate(IG)` em TODO rank | RAM estoura em casos grandes (até 90 GB) | Sistema |
 | 📉 **Não escala** | `rtesolve` é serial | Adicionar mais cores não acelera | Cluster ocioso |
 
-### 13.6 Como queremos que fique (objetivo)
+### 14.6 Como queremos que fique (objetivo)
 
 ```mermaid
 gantt
@@ -663,7 +769,7 @@ gantt
 > A comunicação (amarelo) vira **troca de bordas com vizinhos** (cheap) em vez de
 > reunir tudo no Rank 0 (caro).
 
-### 13.7 Comparativo HOJE vs FUTURO
+### 14.7 Comparativo HOJE vs FUTURO
 
 | Aspecto | Hoje | Objetivo |
 |---------|------|----------|
@@ -675,7 +781,7 @@ gantt
 | Tempo do RTS | Não escala | Escala com cores |
 | Mudanças no código | (nenhuma) | Refatorar sweeps + halo + ALLREDUCE no resíduo |
 
-### 13.8 TL;DR em três frases
+### 14.8 TL;DR em três frases
 
 1. **Hoje:** MFSim é paralelo, mas quando precisa de radiação **para tudo e manda 1 core
    resolver sozinho** o domínio inteiro.
