@@ -100,23 +100,50 @@ de mexer em qualquer coisa. Sem isso, não há como provar que otimização func
 **Pré-requisito:** ambiente de build (gfortran + make) funcionando
 
 > 📖 Leia [05-casos-de-validacao.md](05-casos-de-validacao.md) antes desta fase —
-> ele cataloga os 8 casos disponíveis em `validation/` e qual cada um testa.
+> ele descreve a estrutura atual (cada caso tem subpastas `RTS/` e `MFSim/`) e
+> as ferramentas existentes (`conferir_resultados.py` etc.).
+
+#### ⚠️ Bloqueio conhecido: feature CSV
+
+Os sources do RTS embarcados em `validation/*/RTS/sources/` têm uma feature de output
+CSV (subroutine `csv_save`) que **não existe no `sources/` raiz**. O
+`conferir_resultados.py` depende desse CSV.
+
+**Resolver antes ou junto com a Fase 0:** promover a feature ao `sources/` raiz
+(detalhes em §6 de [05-casos-de-validacao.md](05-casos-de-validacao.md), pegadinha 6.1).
+Sem isso, não dá pra compilar do `sources/` raiz e gerar saída comparável.
 
 #### Atividades
 
-1. **Compilar e rodar** o RTS atual (serial) sem modificações para confirmar ambiente
+1. **Resolver a feature CSV** — copiar para o `sources/` raiz os deltas dos arquivos
+   embarcados (`RTS_global.f90`, `RTS_input.f90`, `RTS_output.f90`, `RTS_start.f90`)
+   e atualizar `input/output.rts` para expor o novo flag. Validar que compila e gera CSV.
 
-2. **Criar infraestrutura de validação automatizada:**
-   - `tests/run_validation.sh CASO` — automatiza setup (copia input.rts e user_functions.f90, edita output.rts conforme readme)
-   - `tests/compare_fields.py` — compara dois conjuntos de output `.dat` com tolerância configurável (RMS, máx absoluto, relativo)
-   - `make validate` no Makefile — roda todos os 8 casos sequencialmente e reporta resultado
+2. **Compilar e rodar** o RTS atual sem modificações em pelo menos 1 caso
+   (`1D_Bordbar` é o mais rápido) para confirmar ambiente.
 
-3. **Rodar TODOS os 8 casos** de validação na configuração serial atual:
-   - `1D_Bordbar_WSGG`, `2D_Goutiere_flame`, `2D_Kim_scattering`, `2D_Shah_solution`
-   - `3D_Bordbar_flame`, `3D_Hsu_benchmark`, `3D_Soucasse_cavity`, `symmetry_bc`
-   - Salvar todos os outputs em `tests/reference/CASO/` — vão ser nosso "gold standard"
+3. **Adaptar `conferir_resultados.py`** — substituir o `ROOT` hardcoded por path
+   relativo ou variável de ambiente. Mover para `tests/conferir_resultados.py` para
+   centralizar com o resto da infra de testes.
 
-4. **Adicionar timers** nas rotinas principais de `RTS_radiation.f90` e `RTS_solvers.f90`:
+4. **Criar `tests/run_validation.sh CASO`** — script que automatiza:
+   - cd no caso
+   - compila (a partir do `sources/` raiz agora que tem CSV)
+   - copia `user_functions.f90` específico do caso
+   - roda o RTS
+   - chama `conferir_resultados.py` comparando com `RTS_results.csv` do MFSim
+   - reporta APROVADO / FALHA
+
+5. **`make validate` no Makefile** — roda `run_validation.sh` em todos os casos
+   sequencialmente e reporta resultado consolidado.
+
+6. **Rodar TODOS os 7 casos** + o demo `symmetry_bc` na configuração serial atual:
+   - `1D_Bordbar`, `2D_Goutiere`, `2D_Kim`, `2D_Shah`
+   - `3D_Bordbar`, `3D_Hsu`, `3D_Soucasse`
+   - Os outputs já existentes em `validation/CASO/RTS/output/*.csv` servem como
+     referência ("gold standard"). Confirmar que reproduzimos.
+
+7. **Adicionar timers** nas rotinas principais de `RTS_radiation.f90` e `RTS_solvers.f90`:
    ```fortran
    double precision :: t0, t1
    call cpu_time(t0)
@@ -127,10 +154,10 @@ de mexer em qualquer coisa. Sem isso, não há como provar que otimização func
    Pontos a instrumentar: `radiative_properties`, `BAND_LOOP`, `RHS_SM_DOM/FAM`,
    `orthogonal_loop`/`agular_loop`, `SOR`, total do `rtesolve`
 
-5. **Benchmark de performance** — rodar `3D_Hsu_benchmark` em malhas crescentes
-   (21³ → 64³ → 128³, e 256³ se RAM permitir). Tabela de tempo total + tempo por rotina.
+8. **Benchmark de performance** — rodar `3D_Hsu` em malhas crescentes (21³ → 64³ → 128³,
+   e 256³ se RAM permitir). Tabela de tempo total + tempo por rotina.
 
-6. **Documentar tudo em `docs/06-baseline.md`** (será criado nesta fase):
+9. **Documentar tudo em `docs/06-baseline.md`** (será criado nesta fase):
    - Versões de gfortran/make usadas
    - Hardware (CPU, RAM)
    - Tabela: caso × tempo serial × memória pico
@@ -141,31 +168,38 @@ de mexer em qualquer coisa. Sem isso, não há como provar que otimização func
 
 | Arquivo | Mudança |
 |---------|---------|
-| [`RTS_radiation.f90`](sources/RTS_radiation.f90) | Adicionar `cpu_time` em pontos-chave |
-| [`RTS_solvers.f90`](sources/RTS_solvers.f90) | Adicionar `cpu_time` no `SOR` |
-| Novo: `tests/run_validation.sh` | Automação de setup de caso |
-| Novo: `tests/compare_fields.py` | Comparação numérica |
-| Novo: `tests/reference/*/` | Outputs gold standard |
-| [`makefile`](makefile) | Adicionar target `make validate` |
+| [`sources/RTS_global.f90`](sources/RTS_global.f90) | + `csv_flag` (vindo do embed) |
+| [`sources/RTS_input.f90`](sources/RTS_input.f90) | + leitura do `csv_flag` |
+| [`sources/RTS_output.f90`](sources/RTS_output.f90) | + subroutine `csv_save` |
+| [`sources/RTS_start.f90`](sources/RTS_start.f90) | + ajuste de `dy` 1D |
+| [`sources/RTS_radiation.f90`](sources/RTS_radiation.f90) | + `cpu_time` em pontos-chave |
+| [`sources/RTS_solvers.f90`](sources/RTS_solvers.f90) | + `cpu_time` no `SOR` |
+| [`input/output.rts`](input/output.rts) | + flag para CSV |
+| Mover: `validation/conferir_resultados.py` → `tests/conferir_resultados.py` | Adaptar path |
+| Novo: `tests/run_validation.sh` | Automação por caso |
+| [`makefile`](makefile) | Target `make validate` |
 | Novo: `docs/06-baseline.md` | Tabelas de medição |
 
 #### Critério de aceitação
 
-- [ ] Todos os 8 casos de validação rodam end-to-end no serial atual
-- [ ] `make validate` passa em todos
-- [ ] Outputs de referência salvos em `tests/reference/CASO/`
-- [ ] `compare_fields.py` funciona — testar quebrando de propósito (mudar 1 valor) e verificar que detecta
-- [ ] Tabela com tempo de cada rotina principal no `3D_Hsu_benchmark` em pelo menos 3 tamanhos
+- [ ] Feature CSV promovida ao `sources/` raiz e funcionando
+- [ ] Todos os 7 casos (`1D_Bordbar`, `2D_Goutiere`, `2D_Kim`, `2D_Shah`, `3D_Bordbar`, `3D_Hsu`, `3D_Soucasse`) rodam end-to-end no serial atual
+- [ ] `make validate` passa em todos (versus os CSVs gold standard existentes)
+- [ ] `conferir_resultados.py` adaptado e funcionando localmente
+- [ ] Testar quebrando de propósito (mudar 1 valor) — confirmar que `conferir_resultados.py` detecta
+- [ ] Tabela com tempo de cada rotina principal no `3D_Hsu` em pelo menos 3 tamanhos (21³, 64³, 128³)
 - [ ] `docs/06-baseline.md` documenta tudo
 
 #### Riscos
 
 | Risco | Mitigação |
 |-------|-----------|
-| Caso de benchmark muito pequeno → tempo de 2s, sinal de speedup nulo | Usar `3D_Hsu_benchmark` em 128³ para benchmark; 21³ só para regressão rápida |
-| Diferenças entre máquinas (gfortran 9 vs 10, flags) | Fixar versão e flags no Makefile, documentar no baseline |
-| Setup manual de casos consome tempo enorme | Investir no `run_validation.sh` cedo — paga dividendos em todas as fases seguintes |
-| Validação WSGG depende da existência dos coeficientes | Confirmar que `WSGG_polynomials` funciona antes (dependência transitiva) |
+| Feature CSV expõe inconsistência com o output esperado pelo MFSim | Validar contra os CSVs gold standard antes de prosseguir |
+| Sources embarcados divergem em algo além da feature CSV | Diff completo entre `sources/` raiz e embeds antes de promover |
+| Caso de benchmark muito pequeno (21³ roda em segundos) | Usar `3D_Hsu` em 128³ para benchmark; 21³ só para regressão rápida |
+| Diferenças entre máquinas (gfortran 9 vs 10) | Fixar versão e flags no Makefile, documentar no baseline |
+| Hardcoded path em `conferir_resultados.py` (`/home/ophir/...`) | Substituir por path relativo / variável de ambiente — Atividade 3 |
+| Validação WSGG depende dos coeficientes carregados | Confirmar que `WSGG_polynomials` funciona antes (transitivo) |
 
 ---
 
@@ -519,18 +553,34 @@ Novo arquivo sugerido:
 
 ## 6. Casos de Validação
 
-**Temos 8 casos em [`validation/`](../validation)** — todos benchmarks publicados na
-literatura com solução de referência conhecida. Catálogo completo em
-[05-casos-de-validacao.md](05-casos-de-validacao.md).
+**Temos 7 casos ativos** + 1 demo em [`validation/`](../validation), todos com setup
+paralelo de **RTS standalone vs MFSim+RTS** para validar a integração. Catálogo
+completo em [05-casos-de-validacao.md](05-casos-de-validacao.md).
 
 ### 6.1 Estratégia em duas vias
 
 | Uso | Casos | Frequência |
 |-----|-------|-----------|
-| **Regressão numérica** (correto?) | todos os 8 com malhas padrão | a cada commit relevante |
-| **Benchmark de performance** (rápido?) | `3D_Hsu_benchmark` em malhas crescentes (21³→256³) | ao fim de cada fase |
+| **Regressão numérica** (correto?) | os 7 casos com malhas padrão | a cada commit relevante |
+| **Benchmark de performance** (rápido?) | `3D_Hsu` em malhas crescentes (21³→256³) | ao fim de cada fase |
 
-### 6.2 Por que `3D_Hsu_benchmark` é o benchmark principal
+### 6.2 Estrutura de cada caso
+
+```
+validation/CASO/
+├── RTS/
+│   ├── input/        configs (input.rts, output.rts, energy.rts)
+│   ├── sources/      RTS embarcado com feature CSV (ver §11.1 do doc 05)
+│   └── output/       CSVs gold standard
+└── MFSim/
+    ├── input/        configs MFSim (*.amr3d, *.f90)
+    └── output/       CSVs gerados pelo MFSim
+```
+
+A comparação é feita por [`validation/conferir_resultados.py`](../validation/conferir_resultados.py)
+entre os dois CSVs.
+
+### 6.3 Por que `3D_Hsu` é o benchmark de performance principal
 
 - 3D (exercita os 8 octantes)
 - FAM (caminho de código mais caro)
@@ -538,7 +588,7 @@ literatura com solução de referência conhecida. Catálogo completo em
 - Geometria simples (cavidade 1m³) → fácil escalar malha mantendo o problema físico
 - Solução Monte Carlo publicada → oráculo de alta precisão
 
-### 6.3 Tamanhos para benchmark de performance
+### 6.4 Tamanhos para benchmark de performance
 
 | Tamanho | nx=ny=nz | Tempo serial estimado | Memória `IG` (FAM 32 dir) |
 |---------|----------|----------------------|---------------------------|
@@ -549,10 +599,24 @@ literatura com solução de referência conhecida. Catálogo completo em
 
 Começar com 21³ (dev rápido), validar com 64³, benchmark final no 128³ ou 256³.
 
-### 6.4 Cobertura por caso
+### 6.5 Cobertura por caso
 
 Cada caso exercita combinações diferentes de método/modelo/dimensão. **Rodar todos
-cobre virtualmente todos os caminhos de código** (ver §5 de [05-casos-de-validacao.md](05-casos-de-validacao.md)).
+cobre praticamente todos os caminhos de código** (ver §7 de [05-casos-de-validacao.md](05-casos-de-validacao.md)).
+Para regressão rápida durante dev: `1D_Bordbar` + `3D_Hsu` é um subset enxuto.
+
+### 6.6 Status de validação atual (do `validados.txt`)
+
+| Caso | Status |
+|------|--------|
+| `1D_Bordbar` | ✅ |
+| `2D_Goutiere` | ✅ |
+| `2D_Kim` | ✅ |
+| `2D_Shah` | ⚠️ não listado |
+| `3D_Bordbar` | ✅ |
+| `3D_Hsu` | ✅ |
+| `3D_Soucasse` | ❌ não listado |
+| `demonstrations/symmetry_bc` | — (demo) |
 
 ---
 
@@ -629,13 +693,15 @@ gantt
 Para começar **hoje**, na ordem:
 
 1. **Validar ambiente:** confirmar que `gfortran` + `make` compilam o RTS atual
-2. **Rodar a configuração padrão** (`input/input.rts` atual) e ver se sai output em `output/`
-3. **Criar branch** `paralelizacao` no git para o trabalho
-4. **Implementar `tests/run_validation.sh`** — automatizar setup de um caso (começar com `3D_Hsu_benchmark`)
-5. **Rodar todos os 8 casos** com o script e gerar `tests/reference/CASO/`
-6. **Adicionar timers** nas rotinas hot (lista em §4 Fase 0)
-7. **Cronometrar `3D_Hsu_benchmark`** em 21³, 64³, 128³
-8. **Documentar tudo** em `docs/06-baseline.md`
+2. **Resolver feature CSV:** promover do embed `validation/CASO/RTS/sources/` para o `sources/` raiz (ver §11.1 de [05-casos-de-validacao.md](05-casos-de-validacao.md))
+3. **Rodar a configuração padrão** e confirmar que gera os mesmos CSVs que os gold standards em `validation/CASO/RTS/output/`
+4. **Criar branch** `paralelizacao` no git para o trabalho
+5. **Adaptar `conferir_resultados.py`** — remover o path hardcoded, mover para `tests/`
+6. **Implementar `tests/run_validation.sh`** — começar com `1D_Bordbar` (mais rápido)
+7. **Rodar todos os 7 casos** e confirmar que reproduzem os gold standards
+8. **Adicionar timers** nas rotinas hot (lista em §4 Fase 0)
+9. **Cronometrar `3D_Hsu`** em 21³, 64³, 128³
+10. **Documentar tudo** em `docs/06-baseline.md`
 
 A partir daí, atacar cada fase em sequência, mantendo as docs em paralelo.
 
