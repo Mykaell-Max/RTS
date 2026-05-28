@@ -6,7 +6,8 @@
 >
 > Pré-requisitos de leitura: [00-comeca-aqui.md](00-comeca-aqui.md),
 > [01-arquitetura-atual.md](01-arquitetura-atual.md),
-> [02-relatorio-mfsim-mpi.md](02-relatorio-mfsim-mpi.md).
+> [02-relatorio-mfsim-mpi.md](02-relatorio-mfsim-mpi.md),
+> [05-casos-de-validacao.md](05-casos-de-validacao.md).
 
 ---
 
@@ -92,15 +93,30 @@ flowchart TB
 
 ### Fase 0 — Baseline e Instrumentação (foundation)
 
-**Objetivo:** estabelecer pontos de medição antes de mexer em qualquer coisa.
-**Esforço:** ~1 semana
+**Objetivo:** estabelecer pontos de medição e infraestrutura de validação **antes**
+de mexer em qualquer coisa. Sem isso, não há como provar que otimização funcionou.
+
+**Esforço:** ~1-2 semanas
 **Pré-requisito:** ambiente de build (gfortran + make) funcionando
+
+> 📖 Leia [05-casos-de-validacao.md](05-casos-de-validacao.md) antes desta fase —
+> ele cataloga os 8 casos disponíveis em `validation/` e qual cada um testa.
 
 #### Atividades
 
-1. **Compilar e rodar** o RTS atual (serial) com um caso de validação
-2. **Escolher caso de benchmark** principal (sugestão: `3D_Hsu_benchmark` — 3D, gas absorvente, suficientemente caro para diferenças aparecerem)
-3. **Adicionar timers** nas rotinas principais:
+1. **Compilar e rodar** o RTS atual (serial) sem modificações para confirmar ambiente
+
+2. **Criar infraestrutura de validação automatizada:**
+   - `tests/run_validation.sh CASO` — automatiza setup (copia input.rts e user_functions.f90, edita output.rts conforme readme)
+   - `tests/compare_fields.py` — compara dois conjuntos de output `.dat` com tolerância configurável (RMS, máx absoluto, relativo)
+   - `make validate` no Makefile — roda todos os 8 casos sequencialmente e reporta resultado
+
+3. **Rodar TODOS os 8 casos** de validação na configuração serial atual:
+   - `1D_Bordbar_WSGG`, `2D_Goutiere_flame`, `2D_Kim_scattering`, `2D_Shah_solution`
+   - `3D_Bordbar_flame`, `3D_Hsu_benchmark`, `3D_Soucasse_cavity`, `symmetry_bc`
+   - Salvar todos os outputs em `tests/reference/CASO/` — vão ser nosso "gold standard"
+
+4. **Adicionar timers** nas rotinas principais de `RTS_radiation.f90` e `RTS_solvers.f90`:
    ```fortran
    double precision :: t0, t1
    call cpu_time(t0)
@@ -110,10 +126,16 @@ flowchart TB
    ```
    Pontos a instrumentar: `radiative_properties`, `BAND_LOOP`, `RHS_SM_DOM/FAM`,
    `orthogonal_loop`/`agular_loop`, `SOR`, total do `rtesolve`
-4. **Salvar resultados de referência** (campos `G`, `S_rad`, `Q_radw`) em arquivos `.dat`
-   binários para comparação byte-a-byte depois
-5. **Criar script de regressão** — roda o caso, compara saída atual com referência, falha se erro > tolerância numérica
-6. **Documentar baseline** — tabela: tempo total, tempo por rotina, em N=64, N=128, N=256
+
+5. **Benchmark de performance** — rodar `3D_Hsu_benchmark` em malhas crescentes
+   (21³ → 64³ → 128³, e 256³ se RAM permitir). Tabela de tempo total + tempo por rotina.
+
+6. **Documentar tudo em `docs/06-baseline.md`** (será criado nesta fase):
+   - Versões de gfortran/make usadas
+   - Hardware (CPU, RAM)
+   - Tabela: caso × tempo serial × memória pico
+   - Tabela: rotina × % do tempo total (perfil)
+   - Anotações sobre comportamento observado
 
 #### Arquivos afetados
 
@@ -121,20 +143,29 @@ flowchart TB
 |---------|---------|
 | [`RTS_radiation.f90`](sources/RTS_radiation.f90) | Adicionar `cpu_time` em pontos-chave |
 | [`RTS_solvers.f90`](sources/RTS_solvers.f90) | Adicionar `cpu_time` no `SOR` |
-| Novo: `tests/regression.sh` | Script de comparação |
-| Novo: `docs/baseline.md` | Tabela de medições |
+| Novo: `tests/run_validation.sh` | Automação de setup de caso |
+| Novo: `tests/compare_fields.py` | Comparação numérica |
+| Novo: `tests/reference/*/` | Outputs gold standard |
+| [`makefile`](makefile) | Adicionar target `make validate` |
+| Novo: `docs/06-baseline.md` | Tabelas de medição |
 
 #### Critério de aceitação
 
-- [ ] RTS compila e roda o caso de validação escolhido
-- [ ] Tabela com tempo de cada rotina principal
-- [ ] Script de regressão funcionando (detecta se mudança quebra o numérico)
-- [ ] Arquivos de referência salvos em `tests/reference/`
+- [ ] Todos os 8 casos de validação rodam end-to-end no serial atual
+- [ ] `make validate` passa em todos
+- [ ] Outputs de referência salvos em `tests/reference/CASO/`
+- [ ] `compare_fields.py` funciona — testar quebrando de propósito (mudar 1 valor) e verificar que detecta
+- [ ] Tabela com tempo de cada rotina principal no `3D_Hsu_benchmark` em pelo menos 3 tamanhos
+- [ ] `docs/06-baseline.md` documenta tudo
 
 #### Riscos
 
-- Caso 3D escolhido pode ser pequeno demais (rodar segundos) → escolher tamanho que rode em ~minutos para ter sinal claro
-- Diferenças entre máquinas (gfortran 9 vs 10, flags) → fixar versão e flags no Makefile
+| Risco | Mitigação |
+|-------|-----------|
+| Caso de benchmark muito pequeno → tempo de 2s, sinal de speedup nulo | Usar `3D_Hsu_benchmark` em 128³ para benchmark; 21³ só para regressão rápida |
+| Diferenças entre máquinas (gfortran 9 vs 10, flags) | Fixar versão e flags no Makefile, documentar no baseline |
+| Setup manual de casos consome tempo enorme | Investir no `run_validation.sh` cedo — paga dividendos em todas as fases seguintes |
+| Validação WSGG depende da existência dos coeficientes | Confirmar que `WSGG_polynomials` funciona antes (dependência transitiva) |
 
 ---
 
@@ -486,26 +517,42 @@ Novo arquivo sugerido:
 
 ---
 
-## 6. Caso de Validação Sugerido
+## 6. Casos de Validação
 
-**Recomendação:** `validation/3D_Hsu_benchmark/`
+**Temos 8 casos em [`validation/`](../validation)** — todos benchmarks publicados na
+literatura com solução de referência conhecida. Catálogo completo em
+[05-casos-de-validacao.md](05-casos-de-validacao.md).
 
-**Por quê:**
-- 3D (não trivial, exercita os 8 octantes)
-- Gas absorvente (exercita WSGG se ativado)
-- Tamanho ajustável via `nx,ny,nz` no `input.rts`
-- Benchmark conhecido na literatura (Hsu)
+### 6.1 Estratégia em duas vias
 
-**Sugestões de tamanho:**
+| Uso | Casos | Frequência |
+|-----|-------|-----------|
+| **Regressão numérica** (correto?) | todos os 8 com malhas padrão | a cada commit relevante |
+| **Benchmark de performance** (rápido?) | `3D_Hsu_benchmark` em malhas crescentes (21³→256³) | ao fim de cada fase |
 
-| Caso | nx=ny=nz | Tempo serial estimado | Memória `IG` serial |
-|------|----------|----------------------|---------------------|
-| Pequeno (dev) | 32 | segundos | ~70 MB |
-| Médio (regressão) | 64 | minutos | ~550 MB |
-| Grande (benchmark) | 128 | dezenas de min | ~4 GB |
-| Estresse | 256 | horas | ~36 GB |
+### 6.2 Por que `3D_Hsu_benchmark` é o benchmark principal
 
-Começar pequeno (dev rápido), validar com médio, benchmark final no grande.
+- 3D (exercita os 8 octantes)
+- FAM (caminho de código mais caro)
+- Absorção e espalhamento **espacialmente variáveis** (impossível otimizar com simplificações)
+- Geometria simples (cavidade 1m³) → fácil escalar malha mantendo o problema físico
+- Solução Monte Carlo publicada → oráculo de alta precisão
+
+### 6.3 Tamanhos para benchmark de performance
+
+| Tamanho | nx=ny=nz | Tempo serial estimado | Memória `IG` (FAM 32 dir) |
+|---------|----------|----------------------|---------------------------|
+| Default validação | 21 | segundos | ~3 MB |
+| Pequeno (dev) | 64 | minutos | ~70 MB |
+| Médio (benchmark padrão) | 128 | dezenas de min | ~550 MB |
+| Grande (estresse) | 256 | horas | ~4 GB |
+
+Começar com 21³ (dev rápido), validar com 64³, benchmark final no 128³ ou 256³.
+
+### 6.4 Cobertura por caso
+
+Cada caso exercita combinações diferentes de método/modelo/dimensão. **Rodar todos
+cobre virtualmente todos os caminhos de código** (ver §5 de [05-casos-de-validacao.md](05-casos-de-validacao.md)).
 
 ---
 
@@ -581,12 +628,14 @@ gantt
 
 Para começar **hoje**, na ordem:
 
-1. **Validar acesso ao código:** clonar, abrir, garantir que entendemos a estrutura
-2. **Compilar e rodar** o caso `3D_Hsu_benchmark` na configuração atual
-3. **Cronometrar** com `cpu_time` quanto demora hoje (será o nosso 0)
-4. **Decidir tamanho de benchmark** (sugestão: nx=64 para dev, nx=128 para release)
-5. **Criar branch** `paralelizacao` no git para o trabalho
-6. **Abrir o documento `05-baseline.md`** (vai capturar a Fase 0)
+1. **Validar ambiente:** confirmar que `gfortran` + `make` compilam o RTS atual
+2. **Rodar a configuração padrão** (`input/input.rts` atual) e ver se sai output em `output/`
+3. **Criar branch** `paralelizacao` no git para o trabalho
+4. **Implementar `tests/run_validation.sh`** — automatizar setup de um caso (começar com `3D_Hsu_benchmark`)
+5. **Rodar todos os 8 casos** com o script e gerar `tests/reference/CASO/`
+6. **Adicionar timers** nas rotinas hot (lista em §4 Fase 0)
+7. **Cronometrar `3D_Hsu_benchmark`** em 21³, 64³, 128³
+8. **Documentar tudo** em `docs/06-baseline.md`
 
 A partir daí, atacar cada fase em sequência, mantendo as docs em paralelo.
 
@@ -594,17 +643,27 @@ A partir daí, atacar cada fase em sequência, mantendo as docs em paralelo.
 
 ## 11. O Que Cada Doc Vai Capturar (futuro)
 
+Documentos já existentes:
+
+| Doc | Conteúdo | Status |
+|-----|----------|--------|
+| [`00-comeca-aqui.md`](00-comeca-aqui.md) | Onboarding para programadores sem background em radiação | ✅ |
+| [`01-arquitetura-atual.md`](01-arquitetura-atual.md) | Mapa completo do código atual | ✅ |
+| [`02-relatorio-mfsim-mpi.md`](02-relatorio-mfsim-mpi.md) | Síntese do relatório do MFSim | ✅ |
+| [`04-plano-de-ataque.md`](04-plano-de-ataque.md) | Este documento | ✅ |
+| [`05-casos-de-validacao.md`](05-casos-de-validacao.md) | Catálogo dos casos em `validation/` | ✅ |
+
 Conforme as fases avançam, novos docs vão capturar o que foi feito:
 
 | Doc | Conteúdo | Fase associada |
 |-----|----------|----------------|
-| `05-baseline.md` | Medições atuais (tempo, memória, perfil) | F0 |
-| `06-openmp-fase1.md` | Implementação e resultados da OpenMP "fácil" | F1 |
-| `07-openmp-fase2.md` | Red-black e wavefront | F2 |
-| `08-refactor-local.md` | Refatoração para subdomínio local | F3 |
-| `09-mpi-decomposicao.md` | MPI propriamente dito (KBA) | F4 |
-| `10-hibrido.md` | OMP + MPI combinados | F5 |
-| `11-benchmarks.md` | Curvas finais de speedup, comparação com tese | F6 |
+| `06-baseline.md` | Medições atuais (tempo, memória, perfil) | F0 |
+| `07-openmp-fase1.md` | Implementação e resultados da OpenMP "fácil" | F1 |
+| `08-openmp-fase2.md` | Red-black e wavefront | F2 |
+| `09-refactor-local.md` | Refatoração para subdomínio local | F3 |
+| `10-mpi-decomposicao.md` | MPI propriamente dito (KBA) | F4 |
+| `11-hibrido.md` | OMP + MPI combinados | F5 |
+| `12-benchmarks.md` | Curvas finais de speedup, comparação com tese | F6 |
 
 Cada um vai ter: o que mudou no código, antes/depois de performance, problemas encontrados, decisões tomadas.
 
