@@ -1,0 +1,10 @@
+*.dat
+*.txt
+*.vtk
+*.o
+*.mod
+*.exe
+tags
+bin
+output
+*.vscode
