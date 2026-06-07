@@ -231,6 +231,7 @@ module input
             read(60,*)aux
         end do
         !=============== Saving Results =================
+        read(60,*)csv_flag
         read(60,*)vtk_flag
         read(60,*)dat_flag
         read(60,*)xyz_save
@@ -238,7 +239,7 @@ module input
         read(60,*)nuss_flag
         read(60,*)aux;read(60,*)aux;read(60,*)aux
         !============ Recorded Variables List ===========
-        do i=1,9
+        do i=1,10
             read(60,*)Rec_flag(i) !ID i
         end do
         read(60,*)aux;read(60,*)aux;read(60,*)aux;read(60,*)aux

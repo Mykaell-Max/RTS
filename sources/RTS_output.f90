@@ -66,12 +66,117 @@ module output
     !----------------------------------------------------------
     subroutine main_save()
         if(cstm_save .and. DIMEN == 3) call walls_custom_save
+        if(csv_flag) call csv_save
         if(vtk_flag) call VTK_save
         if(dat_flag) call dat_save
         if(slice_flag .and. DIMEN == 3) call main_slice
         if(lnp_flag .and. DIMEN > 1) call main_lineup
         if(nuss_flag) call Nusselt_main
     end subroutine main_save
+    !========================================================================================
+    !----------------------------------------------------------
+    !    Saves the selected variables in a CSV file
+    !---------------------- Description -----------------------
+    !----------------------------------------------------------
+    subroutine csv_save
+        implicit none
+        integer :: i, j, k
+        character(len = 1024)::name
+
+        if(trans_flag) then
+            write(name,'(A,I6.6,A)') 'output/RTSresults_',ITP,'.csv'
+        else
+            write(name,'(A,I6.6,A)') 'output/RTSresult.csv'
+        end if
+
+        open(unit=778, file = trim(name), action="write", status="replace", access = "sequential")
+            write(778,'(a)') adjustl(trim(get_header()))
+
+            do k = 1,nzi
+                do j = 1,nyi
+                    do i = 1,nxi
+                        write(778,'(a)') adjustl(trim(make_row()))
+                    end do
+                end do
+            end do
+        close(778)
+    contains
+
+    function get_header() result(header)
+        implicit none
+        character(len = 2048) :: header
+
+        header = "i,j,k,x,y,z"
+        if(Rec_flag(1))  header = trim(adjustl(header)) // ',T_energy'
+        if(Rec_flag(2))  header = trim(adjustl(header)) // ',G'
+        if(Rec_flag(3))  header = trim(adjustl(header)) // ',S_rad'
+        if(Rec_flag(4))  header = trim(adjustl(header)) // ',Ib'
+        if(Rec_flag(5))  header = trim(adjustl(header)) // ',cappa'
+        if(Rec_flag(6))  header = trim(adjustl(header)) // ',sigma_rad'
+        if(Rec_flag(7))  header = trim(adjustl(header)) // ',beta'
+        if(Rec_flag(8))  header = trim(adjustl(header)) // ',K_term'
+        if(Rec_flag(9))  header = trim(adjustl(header)) // ',Emissivity'
+        if(Rec_flag(10)) header = trim(adjustl(header)) // ',q_radw'
+        if(Rec_flag(11)) header = trim(adjustl(header)) // ',P'
+        if(Rec_flag(12)) header = trim(adjustl(header)) // ',XCO2'
+        if(Rec_flag(13)) header = trim(adjustl(header)) // ',XH2O'
+        header = trim(adjustl(header))
+    end function get_header
+
+    function make_row() result(row)
+        implicit none
+        character(len = 2048) :: row
+        character(len = 32) :: value_buffer
+        integer :: rf
+
+        write(row,'(*(G30.20,:,","))') i, j, k, xc(i), yc(j), zc(k)
+
+        do rf = 1,13
+            if(Rec_flag(rf)) then
+                write(value_buffer, "(G30.20)") get_value(rf)
+                row = trim(adjustl(row)) // "," // trim(adjustl(value_buffer))
+            end if
+        end do
+    end function make_row
+
+    function get_value(rf) result(value)
+        implicit none
+        integer, intent(in) :: rf
+        double precision :: value
+
+        select case (rf)
+            case (1)
+                value = T_energy(i,j,k)
+            case (2)
+                value = G(i,j,k)
+            case (3)
+                value = S_rad(i,j,k)
+            case (4)
+                value = IBlack(i,j,k)
+            case (5)
+                value = cappa(i,j,k)
+            case (6)
+                value = sigma(i,j,k)
+            case (7)
+                value = beta(i,j,k)
+            case (8)
+                value = K_term(i,j,k)
+            case (9)
+                value = epsilon_rad(i,j,k)
+            case (10)
+                value = Q_radw(i,j,k)
+            case (11)
+                value = P_species(i,j,k)
+            case (12)
+                value = Y_species(i,j,k,1)
+            case (13)
+                value = Y_species(i,j,k,2)
+            case default
+                value = -1.0d0
+        end select
+    end function get_value
+
+    end subroutine csv_save
     !========================================================================================
     !----------------------------------------------------------
     !       Saves the selected variables in a vtk file

@@ -73,6 +73,7 @@ module global
     
     !<><><><><><><><><><><><><><><><><><> Output Variables <><><><><><><><><><><><><><><><><><><>
     logical :: &
+    csv_flag,  & !save results to csv
     vtk_flag,  & !save results to vtk
     dat_flag,  & !save results to dat
     xyz_save,  & !save mesh positions
