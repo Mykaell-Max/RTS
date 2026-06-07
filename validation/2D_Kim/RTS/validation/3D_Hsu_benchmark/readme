@@ -1,0 +1,25 @@
+Setup for the test case presented in Hsu and Farmer(1997) article.
+
+For more details see "Benchmark Solutions of Radiative Heat Transfer Within 
+Nonhomogeneous Participating Media Using the Monte Carlo and YIX Method".
+doi: https://doi.org/10.1115/1.2824087
+
+Replace the functions present in RTS_functions.f90 with those present in user_functions.f90
+
+To facilitate post-processing, replace these lines in the output.rts file.
+
+!===============================================================
+!                     Lineup Variable Save               
+!===============================================================
+.true.   !on/off lineup save module (only for 3D simulations)
+ 1        !Method: 1-Point 2-Node
+ 2        !Number of Lineups
+!---------------------------------------------------------------!
+! Axis  >>   X:(x,a,b)   Y:(a,y,b)   Z:(a,b,z)                  !
+!---------------------------------------------------------------!
+!             CV Point         CV Node      Variable            !
+! Axis      a        b        a       b        ID               !
+!---------------------------------------------------------------!
+   x      0.50d0   0.50d0     10      10        3 
+   z      0.00d0   0.50d0     10      10        10
+!===============================================================

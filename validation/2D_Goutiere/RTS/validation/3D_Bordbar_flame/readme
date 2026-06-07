@@ -1,0 +1,55 @@
+Setup for the test case presented in Bordbar et al.(2014) article.
+
+For more details see "A line by line based weighted sum of gray gases 
+model for inhomogeneous CO2–H2O mixture in oxy-fired combustion".
+doi: https://doi.org/10.1016/j.combustflame.2014.03.013
+
+Replace the functions present in RTS_functions.f90 with those present in user_functions.f90
+
+To facilitate post-processing, replace these lines in the output.rts file.
+!===============================================================
+!                     Lineup Variable Save               
+!===============================================================
+.true.   !on/off lineup save module (only for 3D simulations)
+ 1        !Method: 1-Point 2-Node
+ 2        !Number of Lineups
+!---------------------------------------------------------------!
+! Axis  >>   X:(x,a,b)   Y:(a,y,b)   Z:(a,b,z)                  !
+!---------------------------------------------------------------!
+!             CV Point         CV Node      Variable            !
+! Axis      a        b        a       b        ID               !
+!---------------------------------------------------------------!
+   y      1.00d0   1.00d0     10      10        3 
+   x      4.00d0   1.00d0     10      10        10
+
+This test case was originally proposed by Liu (1999) with some minor 
+modifications and later repeated by Potter (2010).
+
+Modify the following lines in the input.rts file
+   
+  .true.     0.10d0    !CO2 mole fraction
+  .true.     0.20d0    !H2O mole fraction
+   
+For more details see "Numerical Solutions of Three-Dimensional Non-Grey 
+Gas Radiative Transfer Using the Statistical Narrow-Band Model"
+doi: https://doi.org/10.1115/1.2825944
+
+and "Evaluation of solution methods for radiative heat transfer in 
+gaseous oxy-fuel combustion environments"
+doi: https://doi.org/10.1016/j.jqsrt.2010.04.028
+
+To facilitate post-processing, replace these lines in the output.rts file.
+!===============================================================
+!                     Lineup Variable Save               
+!===============================================================
+.true.    !on/off lineup save module (only for 3D simulations)
+ 1        !Method: 1-Point 2-Node
+ 2        !Number of Lineups
+!---------------------------------------------------------------!
+! Axis  >>   X:(x,a,b)   Y:(a,y,b)   Z:(a,b,z)                  !
+!---------------------------------------------------------------!
+!             CV Point         CV Node      Variable            !
+! Axis      a        b        a       b        ID               !
+!---------------------------------------------------------------!
+   y      1.00d0   1.00d0     10      10        3 
+   y      1.00d0   2.00d0     10      10        10

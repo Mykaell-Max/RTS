@@ -1,0 +1,39 @@
+Setup for the test case presented in Soucasse et al.(2014) article.
+
+For more details see "Numerical study of coupled molecular gas radiation 
+and natural convection in a differentially heated cubical cavity".
+doi: 10.1615/ComputThermalScien.2012005118
+
+Replace the functions present in RTS_functions.f90 with those present in user_functions.f90
+
+
+To facilitate post-processing, replace these lines in the output.rts file.
+
+!===============================================================
+!                          Slices Save
+!===============================================================
+.true.   !on/off slices save module (only for 3D simulations)
+ 2        !Slicing Method: 1-Percent 2-Point 3-Node
+ 2        !Number of Slices
+!---------------------------------------------------------------
+! Axis  Percent  Point   Node    ID
+   x      50     0.25d0   10      3 
+   x      50     0.75d0   10      3
+!<> add more lines if needed
+!===============================================================
+!                     Lineup Variable Save               
+!===============================================================
+.true.   !on/off lineup save module (only for 3D simulations)
+ 1        !Method: 1-Point 2-Node
+ 4        !Number of Lineups
+!---------------------------------------------------------------!
+! Axis  >>   X:(x,a,b)   Y:(a,y,b)   Z:(a,b,z)                  !
+!---------------------------------------------------------------!
+!             CV Point         CV Node      Variable            !
+! Axis      a        b        a       b        ID               !
+!---------------------------------------------------------------!
+   x      0.25d0   0.25d0     10      10        3 
+   x      0.25d0   0.75d0     10      10        3
+   x      0.25d0   1.00d0     10      10        10
+   x      0.25d0   0.00d0     10      10        10
+!===============================================================

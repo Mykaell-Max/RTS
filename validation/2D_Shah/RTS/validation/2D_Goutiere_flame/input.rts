@@ -1,0 +1,63 @@
+!==============================================================
+!   /\\\\\\\\\      /\\\\\\\\\\\\\\\     /\\\\\\\\\\\        
+!  /\\\///////\\\   \///////\\\/////    /\\\/////////\\\     
+!  \/\\\     \/\\\         \/\\\        \//\\\      \///     
+!   \/\\\\\\\\\\\/          \/\\\         \////\\\           
+!    \/\\\//////\\\          \/\\\            \////\\\       
+!     \/\\\    \//\\\         \/\\\               \////\\\    
+!      \/\\\     \//\\\        \/\\\        /\\\      \//\\\
+!       \/\\\      \//\\\       \/\\\       \///\\\\\\\\\\\/
+!        \///        \///        \///          \///////////     
+!================= Mesh Generation Parameters =================
+2           !Number of dimensions: 1D, 2D, 3D
+21          !Control volumes in x direction
+21          !Control volumes in y direction
+21          !Control volumes in z direction
+1.0d0       !physical length in the x direction [m]
+0.5d0       !physical height in the y direction [m]
+1.0d0       !physical width  in the z direction [m]
+.false.     !Add paths (if true go to paths.rts)
+!============ Radiation Method for Solving the RTE ============
+FAM         !Radiation module: FAM, DOM, P1
+Upwind      !Spatial Scheme for the RTE: Upwind,CDS
+!----------------- Scattering Phase Function ------------------
+.false.     !Use anisotropic scattering model
+linear      !Scattering Model: Mie,Rayleigh,Linear,HG
+F2          !Mie scattering: F0-F7,B0-B3
+1.0d0       !Linear phase function coefficient (-1 < A < 1)
+!==================== Finite Angle Method =====================
+8           !control angles in phi direction
+4           !control angles in theta direction
+6           !Angular subdivisions anisotropic scattering
+!================= Discrete Ordinates Method ==================
+Tn          !Quadrature model: Sn,Tn,Qn
+4           !Quadrature order: 2,4,6.. for Sn 1,2,3.. for Tn and Qn
+!============== Radiative Gas Properties Module ===============
+.true.      !Gas properties module
+ WSGG       !Absorption model: Gray, WSGG
+.true.      !Use non-gray radiation
+!====================== Input Parameters ======================
+! uniform     value         variable name
+!  field    (if true)    
+!--------------------------------------------------------------  
+  .false.   64.8032d0  !Temperature [K]
+  .true.     0.0d0     !Incident radiation [w/m^2]
+  .true.    1.00d+1    !Absorption coefficient  [m^-1]
+  .true.     0.0d0     !Scattering coefficient  [m^-1]
+  .true.     0.10d0    !CO2 mole fraction
+  .true.     0.20d0    !H2O mole fraction
+  .true.   101.325d3   !Pressure of the mixture (atm)
+!NOTE: if false go to RTS_functions.f90 and setup
+!================== Information at the Walls ==================
+!     T        ew      uniform   symmetry    Wall
+   000.0d0    1.0d0    .true.     .false.   !WEST
+   000.0d0    1.0d0    .true.     .false.   !EAST
+   000.0d0    1.0d0    .true.     .false.   !SOUTH
+   000.0d0    1.0d0    .true.     .false.   !NORTH
+   000.0d0    1.0d0    .true.     .false.   !BOTTOM
+   000.0d0    1.0d0    .true.     .false.   !TOP
+!NOTE: if uniform is false go to RTS_functions.f90 and setup
+!==================== Convergence Criteria ====================
+1.0d-6      !Radiation convergence criteria
+10000       !Maximum number of iterations
+!==============================================================
