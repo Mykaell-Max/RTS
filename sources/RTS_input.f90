@@ -239,7 +239,8 @@ module input
         read(60,*)nuss_flag
         read(60,*)aux;read(60,*)aux;read(60,*)aux
         !============ Recorded Variables List ===========
-        do i=1,10
+        ! Reads 13 IDs (1-10 plus P, XCO2, XH2O used by the 13-column csv_save)
+        do i=1,13
             read(60,*)Rec_flag(i) !ID i
         end do
         read(60,*)aux;read(60,*)aux;read(60,*)aux;read(60,*)aux

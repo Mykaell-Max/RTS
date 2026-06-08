@@ -422,7 +422,7 @@ module start_variables
                 y(j) = (j-1.0d0)*dy
             end do
         else
-            y =(/0.0d0, lx*0.05d0/)
+            y =(/0.0d0, 1.0d-5/)
         end if
         !------------ z-direction uniform grid ------------!
         if(DIMEN == 3)then

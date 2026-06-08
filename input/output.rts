@@ -11,6 +11,7 @@
 !===============================================================
 !                         Save Options                          
 !===============================================================
+.true.      !Save results to csv
 .true.      !Save results to vtk
 .true.      !Save results to dat
 .false.     !Save the mesh position vectors
@@ -22,12 +23,16 @@
 .true.    !Temperature               ID 1
 .true.    !Incident  radiation       ID 2
 .true.    !Divergent rad flux        ID 3
-.false.   !Blackbody radiation       ID 4
-.false.   !Absorption coefficient    ID 5
-.false.   !Scattering coefficient    ID 6
-.false.   !Extinction coefficient    ID 7
+.true.   !Blackbody radiation       ID 4
+.true.   !Absorption coefficient    ID 5
+.true.   !Scattering coefficient    ID 6
+.true.   !Extinction coefficient    ID 7
 .false.   !Thermal conductivity      ID 8
-.false.   !Radiation emissivities    ID 9
+.true.   !Radiation emissivities    ID 9
+.true.    !Wall heat flux            ID 10
+.true.    !Pressure                  ID 11
+.true.    !X_CO2                     ID 12
+.true.    !X_H2O                     ID 13  
 !===============================================================
 !                  Walls Custom Variable Save
 !===============================================================

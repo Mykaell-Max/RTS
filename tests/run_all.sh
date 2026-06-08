@@ -47,6 +47,17 @@ fi
 declare -A RESULTADOS
 FALHAS=0
 
+# Modo de build:
+#   - baseline (--update-baselines): binário SERIAL (OMP=) -> referência confiável
+#   - regressão (padrão):            binário OpenMP        -> usa OMP_NUM_THREADS
+if [ "$UPDATE_MODE" -eq 1 ]; then
+    MAKE_OMP="OMP="          # serial
+    BUILD_DESC="serial (referência)"
+else
+    MAKE_OMP=""              # default do makefile = -fopenmp
+    BUILD_DESC="OpenMP (OMP_NUM_THREADS=${OMP_NUM_THREADS:-padrão do SO})"
+fi
+
 echo ""
 if [ "$UPDATE_MODE" -eq 1 ]; then
     echo -e "${BOLD}=============================================${RESET}"
@@ -57,7 +68,13 @@ else
     echo -e "${BOLD}  RTS  --  Regressão completa (7 casos)      ${RESET}"
     echo -e "${BOLD}=============================================${RESET}"
 fi
+echo -e "  build: ${BUILD_DESC}"
 echo ""
+
+# Limpeza única no início: garante que os .o correspondem ao modo de build
+# atual (serial vs OpenMP). Dentro de uma rodada o flag é constante, então o
+# make incremental por caso (que só recompila RTS_functions) é suficiente.
+(cd "$REPO_ROOT" && make clean -s $MAKE_OMP) 2>/dev/null || true
 
 for CASO in "${CASOS[@]}"; do
     CASE_RTS="$REPO_ROOT/validation/$CASO/RTS"
@@ -71,7 +88,7 @@ for CASO in "${CASOS[@]}"; do
     cp "$CASE_RTS/sources/RTS_functions.f90" "$REPO_ROOT/sources/RTS_functions.f90"
 
     # --- 2. Compilar (incremental: só recompila o que mudou) ---
-    if ! (cd "$REPO_ROOT" && make -s) ; then
+    if ! (cd "$REPO_ROOT" && make -s $MAKE_OMP) ; then
         echo -e "  ${RED}[FAIL] compilação falhou${RESET}"
         RESULTADOS[$CASO]="FAIL (compilação)"
         FALHAS=$((FALHAS + 1))

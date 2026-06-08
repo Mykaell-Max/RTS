@@ -23,11 +23,16 @@
 
 PROGRAM = RTS
 FC   = gfortran
+
+#OpenMP (shared-memory parallelism). Set OMP= (empty) to build a serial binary,
+#useful for generating the serial reference, e.g.:  make OMP= run
+OMP = -fopenmp
+
 #DEBUG
 #FFLAGS=-c -Wall -fbounds-check -Wextra -pedantic -ffpe-trap=zero,overflow,underflow -Wline-truncation
 
 #RUN
-FFLAGS=-c -g -Wall -Werror -Wconversion -Wno-unused-dummy-argument -fbacktrace -fcheck=all
+FFLAGS=-c -g -Wall -Werror -Wconversion -Wno-unused-dummy-argument -fbacktrace -fcheck=all $(OMP)
 
 #FOLDERS
 OUT = ./output
@@ -43,7 +48,7 @@ FSOURCES = $(BIN)/RTS_global.o     $(BIN)/RTS_input.o $(BIN)/RTS_scattering.o $(
 all: presentation create $(PROGRAM)
 
 $(PROGRAM): $(MAIN) $(FSOURCES)
-	$(FC)  $(FSOURCES) $(MAIN) -I $(BIN) -o $(BIN)/$(PROGRAM)
+	$(FC) $(OMP) $(FSOURCES) $(MAIN) -I $(BIN) -o $(BIN)/$(PROGRAM)
 	@echo ' '
 	@echo '--- Finished Building Program: $@ ---'
 

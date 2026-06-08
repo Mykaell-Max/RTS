@@ -9,11 +9,11 @@
 !       \/\\\      \//\\\       \/\\\       \///\\\\\\\\\\\/
 !        \///        \///        \///          \///////////     
 !================= Mesh Generation Parameters =================
-3           !Number of dimensions: 1D, 2D, 3D
-17          !Control volumes in x direction
-34          !Control volumes in y direction
-17          !Control volumes in z direction
-2.0d0       !physical length in the x direction [m]
+1           !Number of dimensions: 1D, 2D, 3D
+30          !Control volumes in x direction
+40          !Control volumes in y direction
+20          !Control volumes in z direction
+1.0d0       !physical length in the x direction [m]
 4.0d0       !physical height in the y direction [m]
 2.0d0       !physical width  in the z direction [m]
 .false.     !Add paths (if true go to paths.rts)
@@ -44,14 +44,14 @@ Tn          !Quadrature model: Sn,Tn,Qn
   .true.     0.0d0     !Incident radiation [w/m^2]
   .true.    1.00d+1    !Absorption coefficient  [m^-1]
   .true.     0.0d0     !Scattering coefficient  [m^-1]
-  .true.     0.85d0    !CO2 mole fraction
-  .true.     0.10d0    !H2O mole fraction
+  .true.     1.0d-4    !CO2 mole fraction
+  .true.     0.50d0    !H2O mole fraction
   .true.   101.325d3   !Pressure of the mixture (atm)
 !NOTE: if false go to RTS_functions.f90 and setup
 !================== Information at the Walls ==================
 !     T        ew      uniform   symmetry    Wall
-   300.0d0    1.0d0    .true.     .false.   !WEST
-   300.0d0    1.0d0    .true.     .false.   !EAST
+   400.0d0    1.0d0    .true.     .false.   !WEST
+   400.0d0    1.0d0    .true.     .false.   !EAST
    300.0d0    1.0d0    .true.     .false.   !SOUTH
    300.0d0    1.0d0    .true.     .false.   !NORTH
    300.0d0    1.0d0    .true.     .false.   !BOTTOM

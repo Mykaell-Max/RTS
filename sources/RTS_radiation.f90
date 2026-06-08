@@ -467,6 +467,9 @@ module radiation
 
         double precision :: Iblack(nxi,nyi,nzi),Sm(nxi,nyi,nzi,nt,np),IG(nxi,nyi,nzi,nt,np),SMSUM
         integer :: i,j,k,l,m,ll,mm
+        !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(i,j,l,m,ll,mm,SMSUM) &
+        !$OMP   SHARED(nzp,nyp,nxp,nt,np,sigma,IG,phase_f,dco,cappa,Iblack,Sm,PI4) &
+        !$OMP   SCHEDULE(STATIC)
         do k=2,nzp
             do j=2,nyp
                 do i=2,nxp
@@ -486,6 +489,7 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
     end subroutine RHS_SM_FAM
     !========================================================================================
     !----------------------------------------------------------
@@ -972,6 +976,9 @@ module radiation
     subroutine G_FAM(Grad,IG)
         integer :: i,j,k,l,m
         double precision :: GSUM,Grad(nxi,nyi,nzi),IG(nxi,nyi,nzi,nt,np)
+        !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(i,j,l,m,GSUM) &
+        !$OMP   SHARED(nzi,nxi,nyi,nt,np,IG,dco,Grad) &
+        !$OMP   SCHEDULE(STATIC)
         do k=1,nzi
             do i=1,nxi
                 do j=1,nyi
@@ -985,6 +992,7 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
     end subroutine G_FAM
     !========================================================================================
     !----------------------------------------------------------
@@ -1222,6 +1230,9 @@ module radiation
     subroutine RHS_SM_DOM(Sm,IG,Iblack)
         double precision :: Iblack(nxi,nyi,nzi),Sm(nxi,nyi,nzi,nq,8),IG(nxi,nyi,nzi,nq,8),SMSUM,aux
         integer :: i,j,k,l,ls,m
+        !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(i,j,l,ls,m,SMSUM,aux) &
+        !$OMP   SHARED(nzp,nyp,nxp,nq,sigma,IG,phase_d,Wq,cappa,Iblack,Sm,PI4) &
+        !$OMP   SCHEDULE(STATIC)
         do k=2,nzp
             do j=2,nyp
                 do i=2,nxp
@@ -1240,6 +1251,7 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
     end subroutine RHS_SM_DOM
     !========================================================================================
     !----------------------------------------------------------
@@ -1748,6 +1760,9 @@ module radiation
     subroutine G_DOM(Grad,IG)
         integer :: i,j,k,l,m
         double precision :: GSUM,Grad(nxi,nyi,nzi),IG(nxi,nyi,nzi,nq,8)
+        !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(i,j,l,m,GSUM) &
+        !$OMP   SHARED(nzi,nxi,nyi,nq,IG,Wq,Grad) &
+        !$OMP   SCHEDULE(STATIC)
         do k=1,nzi
             do i=1,nxi
                 do j=1,nyi
@@ -1761,6 +1776,7 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
     end subroutine G_DOM
     !========================================================================================
     !-----------------------------------------------------------

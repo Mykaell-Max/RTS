@@ -66,6 +66,9 @@ module absorptiondata
         if(nongray_flag)then 
             if(wsgg_model)then
                 write(*,'(a)') 'Absorption Model: Non-Gray WSGG '
+                !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(i,j,IBND,a_wgh,K_wgh) &
+                !$OMP   SHARED(nzp,nyp,nxp,nsb,T_energy,P_species,Y_species,cappaBND,BBF) &
+                !$OMP   SCHEDULE(STATIC)
                 do k=2,nzp
                     do j=2,nyp
                         do i=2,nxp
@@ -78,6 +81,7 @@ module absorptiondata
                         end do
                     end do
                 end do
+                !$OMP END PARALLEL DO
             end if
         !-------------------------------------------------------------------
         !                     Gray radiation properties
@@ -85,6 +89,9 @@ module absorptiondata
         else
             if(wsgg_model)then
                 write(*,'(a)') ' Absorption Model: Gray WSGG '
+                !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(i,j,a_wgh,K_wgh) &
+                !$OMP   SHARED(nzp,nyp,nxp,T_energy,P_species,Y_species,cappa) &
+                !$OMP   SCHEDULE(STATIC)
                 do k=2,nzp
                     do j=2,nyp
                         do i=2,nxp
@@ -94,8 +101,12 @@ module absorptiondata
                         end do
                     end do
                 end do
+                !$OMP END PARALLEL DO
             else if(gray_model)then
                 write(*,'(a)') ' Absorption Model: Gray Gas'
+                !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(i,j) &
+                !$OMP   SHARED(nzp,nyp,nxp,T_energy,P_species,Y_species,cappa) &
+                !$OMP   SCHEDULE(STATIC)
                 do k=2,nzp
                     do j=2,nyp
                         do i=2,nxp
@@ -103,6 +114,7 @@ module absorptiondata
                         end do
                     end do
                 end do
+                !$OMP END PARALLEL DO
             end if
         end if
         !-------------------------------------------------------------------
@@ -141,6 +153,7 @@ module absorptiondata
     subroutine WSGG(T,P,XCO2,XH2O,a_wgh,K_wgh)
         implicit none
         double precision :: T,P,XCO2,XH2O,Mr,a_wgh(nsb),K_wgh(nsb)
+        double precision :: b_wgh(nGi,nGj) !local scratch (was a module variable)
         call WSGG_MolRatio(Mr,XCO2,XH2O)
         call WSGG_weights(Mr,b_wgh)
         call a_weights(T,a_wgh,b_wgh)
@@ -308,7 +321,7 @@ module absorptiondata
     !----------------------------------------------------------
     subroutine WSGG_polynomials()
         nsb = 5; nGi = 4; nGj = 5
-        allocate(d_wgh(nGi,nsb),c_wgh(nGi,nGj,nsb),b_wgh(nGi,nGj))
+        allocate(d_wgh(nGi,nsb),c_wgh(nGi,nGj,nsb))
         !Mounting the C's array
         c_wgh(1,1,1:5) = (/ 7.412956d-1, -5.244441d-1,  5.822860d-1, -2.096994d-1,  2.420312d-2 /)
         c_wgh(1,2,1:5) = (/-9.412652d-1,  2.799577d-1, -7.672319d-1,  3.204027d-1, -3.910174d-2 /)

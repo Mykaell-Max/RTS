@@ -314,8 +314,12 @@ module global
     Lm           !Averaged mean beam length
     
     double precision,allocatable,dimension(:,:)   :: &
-    d_wgh,     & !emissivity polynomial coefficients of the WSGG
-    b_wgh        !asorptivity polynomial coefficient of the WSGG
+    d_wgh        !emissivity polynomial coefficients of the WSGG
+    !NOTE: b_wgh (WSGG b coefficient) was moved to a local array inside the
+    !      WSGG subroutine (RTS_absorption.f90). It is pure scratch space passed
+    !      between WSGG_weights and a_weights within a single WSGG call. Keeping
+    !      it as a shared module variable created a race condition when WSGG is
+    !      called concurrently by multiple threads (radiative_properties loop).
     
     double precision,allocatable,dimension(:,:,:) :: &
     c_wgh        !asorptivity polynomial coefficients of the WSGG

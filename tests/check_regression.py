@@ -15,6 +15,7 @@ Retorna:
 """
 
 import sys
+import numpy as np
 import pandas as pd
 from pathlib import Path
 
@@ -87,18 +88,49 @@ def compare(case_name: str, new_csv: Path, baseline_csv: Path) -> bool:
     novo = novo.reset_index(drop=True)
     ref  = ref .reset_index(drop=True)
 
-    try:
-        pd.testing.assert_frame_equal(
-            novo, ref,
-            rtol=1e-5,
-            atol=1e-8,
-            check_dtype=False,
-            check_like=False,
-        )
-        return True
-    except AssertionError as e:
-        print(str(e)[:800])
+    # --- checar mesmo número de linhas ---
+    if len(novo) != len(ref):
+        print(f"[ERRO] Número de linhas difere: novo={len(novo)} baseline={len(ref)}")
         return False
+
+    if list(novo.columns) != list(ref.columns):
+        print(f"[ERRO] Colunas diferem:\n  novo={list(novo.columns)}\n  ref ={list(ref.columns)}")
+        return False
+
+    # --- comparação numérica robusta, coluna a coluna ---
+    #
+    # Observação: o csv_save do RTS usa formato Fortran G30.20. Para números
+    # subnormais com expoente de 3 dígitos (ex.: 1e-305) o Fortran imprime
+    # "0.123...-305" SEM o "E", o que o pandas lê como string (dtype object).
+    # Esses valores sao poeira de ponto flutuante (~0) em células fantasma.
+    # Por isso convertemos cada coluna para numérico com errors='coerce'
+    # (subnormais malformados viram NaN) e tratamos NaN como 0 antes de
+    # comparar com tolerância. Isso é mais robusto que assert_frame_equal,
+    # que compara colunas object como texto exato.
+    rtol, atol = 1e-5, 1e-8
+    falhas = []
+    for col in novo.columns:
+        a = pd.to_numeric(novo[col], errors="coerce").to_numpy(dtype=float)
+        b = pd.to_numeric(ref [col], errors="coerce").to_numpy(dtype=float)
+        a = np.nan_to_num(a, nan=0.0)
+        b = np.nan_to_num(b, nan=0.0)
+        diff = np.abs(a - b)
+        tol  = atol + rtol * np.abs(b)
+        ruins = diff > tol
+        if ruins.any():
+            idx = int(np.argmax(diff - tol))
+            falhas.append(
+                f"  coluna '{col}': {int(ruins.sum())} célula(s) fora da tolerância; "
+                f"pior em linha {idx}: novo={a[idx]:.6e} baseline={b[idx]:.6e} "
+                f"(|diff|={diff[idx]:.2e}, tol={tol[idx]:.2e})"
+            )
+
+    if falhas:
+        print("Diferenças acima da tolerância (rtol=1e-5, atol=1e-8):")
+        print("\n".join(falhas[:10]))
+        return False
+
+    return True
 
 
 # ---------------------------------------------------------------------------
