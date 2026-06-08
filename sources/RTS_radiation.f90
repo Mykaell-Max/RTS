@@ -523,15 +523,26 @@ module radiation
         integer :: i,j,k,l,m
         double precision :: Sm(nxi,nyi,nzi,nt,np),IG(nxi,nyi,nzi,nt,np),num,deno,dif,Ip,Iw,Is,Ib,eps
         eps = -1.0d0
+        ! Paralelizacao angular (Fase 2): em cada octante as direcoes (l,m) sao
+        ! independentes -- cada uma escreve so a sua fatia IG(:,:,:,l,m) e le so
+        ! vizinhos da mesma direcao. Levar (l,m) para fora e paralelizar e uma
+        ! troca de ordem de loop sem dependencia cruzada: resultado bit-identico
+        ! ao serial. A varredura espacial (k,j,i) permanece sequencial dentro de
+        ! cada direcao, preservando a dependencia upwind. eps usa REDUCTION(max),
+        ! que e associativa/comutativa -> independente da ordem das threads.
         !1st octant (i=2,nxp;j=2,nyp;k=2,nzp;l=1,T2;m=1,P2)
-        do k=2,nzp
-            do j=2,nyp
-                do i=2,nxp
-                    do l=1,T2
-                        do m=1,P2
+        !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+        !$OMP   PRIVATE(i,j,k,l,m,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(nxp,nyp,nzp,T2,P2,P3,P4,nt,np,IG,Ax,Ay,Az,alp_r,volom,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=1,T2
+            do m=1,P2
+                do k=2,nzp
+                    do j=2,nyp
+                        do i=2,nxp
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i-1,j,k,l,m),IG(i,j-1,k,l,m),IG(i,j,k-1,l,m),Ip,Iw,Is,Ib)
-                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m) 
+                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m)
                             deno = Ax(j,k,l,m) + Ay(i,k,l,m) + Az(i,j,l,m) + alp_r*beta(i,j,k)*volom(i,j,k,l,m)
                             IG(i,j,k,l,m) = num/(deno + small)
                             dif = abs(IG(i,j,k,l,m) - Ip)/(IG(i,j,k,l,m) + small)
@@ -541,15 +552,20 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         !2nd octant (i=nxp,2;j=2,nyp;k=2,nzp;l=1,T2;m=P2+1,P3)
-        do k=2,nzp
-            do j=2,nyp
-                do i=nxp,2,-1
-                    do l=1,T2
-                        do m=P2+1,P3
+        !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+        !$OMP   PRIVATE(i,j,k,l,m,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(nxp,nyp,nzp,T2,P2,P3,P4,nt,np,IG,Ax,Ay,Az,alp_r,volom,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=1,T2
+            do m=P2+1,P3
+                do k=2,nzp
+                    do j=2,nyp
+                        do i=nxp,2,-1
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i+1,j,k,l,m),IG(i,j-1,k,l,m),IG(i,j,k-1,l,m),Ip,Iw,Is,Ib)
-                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m) 
+                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m)
                             deno = Ax(j,k,l,m) + Ay(i,k,l,m) + Az(i,j,l,m) + alp_r*beta(i,j,k)*volom(i,j,k,l,m)
                             IG(i,j,k,l,m) = num/(deno + small)
                             dif = abs(IG(i,j,k,l,m) - Ip)/(IG(i,j,k,l,m) + small)
@@ -559,15 +575,20 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         !3rd octant (i=nxp,2;j=nyp,2;k=2,nzp;l=1,T2;m=P3+1,P4)
-        do k=2,nzp
-            do j=nyp,2,-1
-                do i=nxp,2,-1
-                    do l=1,T2
-                        do m=P3+1,P4
+        !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+        !$OMP   PRIVATE(i,j,k,l,m,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(nxp,nyp,nzp,T2,P2,P3,P4,nt,np,IG,Ax,Ay,Az,alp_r,volom,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=1,T2
+            do m=P3+1,P4
+                do k=2,nzp
+                    do j=nyp,2,-1
+                        do i=nxp,2,-1
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i+1,j,k,l,m),IG(i,j+1,k,l,m),IG(i,j,k-1,l,m),Ip,Iw,Is,Ib)
-                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m) 
+                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m)
                             deno = Ax(j,k,l,m) + Ay(i,k,l,m) + Az(i,j,l,m) + alp_r*beta(i,j,k)*volom(i,j,k,l,m)
                             IG(i,j,k,l,m) = num/(deno + small)
                             dif = abs(IG(i,j,k,l,m) - Ip)/(IG(i,j,k,l,m) + small)
@@ -577,15 +598,20 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         !4th octant (i=2,nxp;j=nyp,2;k=2,nzp;l=1,T2;m=P4+1,np)
-        do k=2,nzp
-            do j=nyp,2,-1
-                do i=2,nxp
-                    do l=1,T2
-                        do m=P4+1,np
+        !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+        !$OMP   PRIVATE(i,j,k,l,m,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(nxp,nyp,nzp,T2,P2,P3,P4,nt,np,IG,Ax,Ay,Az,alp_r,volom,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=1,T2
+            do m=P4+1,np
+                do k=2,nzp
+                    do j=nyp,2,-1
+                        do i=2,nxp
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i-1,j,k,l,m),IG(i,j+1,k,l,m),IG(i,j,k-1,l,m),Ip,Iw,Is,Ib)
-                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m) 
+                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m)
                             deno = Ax(j,k,l,m) + Ay(i,k,l,m) + Az(i,j,l,m) + alp_r*beta(i,j,k)*volom(i,j,k,l,m)
                             IG(i,j,k,l,m) = num/(deno + small)
                             dif = abs(IG(i,j,k,l,m) - Ip)/(IG(i,j,k,l,m) + small)
@@ -595,15 +621,20 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         !5th octant (i=2,nxp;j=2,nyp;k=nzp,2;l=T2+1,nt;m=1,P2)
-        do k=nzp,2,-1
-            do j=2,nyp
-                do i=2,nxp
-                    do l=T2+1,nt
-                        do m=1,P2
+        !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+        !$OMP   PRIVATE(i,j,k,l,m,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(nxp,nyp,nzp,T2,P2,P3,P4,nt,np,IG,Ax,Ay,Az,alp_r,volom,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=T2+1,nt
+            do m=1,P2
+                do k=nzp,2,-1
+                    do j=2,nyp
+                        do i=2,nxp
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i-1,j,k,l,m),IG(i,j-1,k,l,m),IG(i,j,k+1,l,m),Ip,Iw,Is,Ib)
-                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m) 
+                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m)
                             deno = Ax(j,k,l,m) + Ay(i,k,l,m) + Az(i,j,l,m) + alp_r*beta(i,j,k)*volom(i,j,k,l,m)
                             IG(i,j,k,l,m) = num/(deno + small)
                             dif = abs(IG(i,j,k,l,m) - Ip)/(IG(i,j,k,l,m) + small)
@@ -613,15 +644,20 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         !6th octant (i=nxp,2;j=2,nyp;k=nzp,2;l=T2+1,nt;m=P2+1,P3)
-        do k=nzp,2,-1
-            do j=2,nyp
-                do i=nxp,2,-1
-                    do l=T2+1,nt
-                        do m=P2+1,P3
+        !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+        !$OMP   PRIVATE(i,j,k,l,m,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(nxp,nyp,nzp,T2,P2,P3,P4,nt,np,IG,Ax,Ay,Az,alp_r,volom,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=T2+1,nt
+            do m=P2+1,P3
+                do k=nzp,2,-1
+                    do j=2,nyp
+                        do i=nxp,2,-1
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i+1,j,k,l,m),IG(i,j-1,k,l,m),IG(i,j,k+1,l,m),Ip,Iw,Is,Ib)
-                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m) 
+                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m)
                             deno = Ax(j,k,l,m) + Ay(i,k,l,m) + Az(i,j,l,m) + alp_r*beta(i,j,k)*volom(i,j,k,l,m)
                             IG(i,j,k,l,m) = num/(deno + small)
                             dif = abs(IG(i,j,k,l,m) - Ip)/(IG(i,j,k,l,m) + small)
@@ -631,15 +667,20 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         !7th octant (i=nxp,2;j=nyp,2;k=nzp,2;l=T2+1,nt;m=P3+1,P4)
-        do k=nzp,2,-1
-            do j=nyp,2,-1
-                do i=nxp,2,-1
-                    do l=T2+1,nt
-                        do m=P3+1,P4
+        !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+        !$OMP   PRIVATE(i,j,k,l,m,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(nxp,nyp,nzp,T2,P2,P3,P4,nt,np,IG,Ax,Ay,Az,alp_r,volom,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=T2+1,nt
+            do m=P3+1,P4
+                do k=nzp,2,-1
+                    do j=nyp,2,-1
+                        do i=nxp,2,-1
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i+1,j,k,l,m),IG(i,j+1,k,l,m),IG(i,j,k+1,l,m),Ip,Iw,Is,Ib)
-                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m) 
+                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m)
                             deno = Ax(j,k,l,m) + Ay(i,k,l,m) + Az(i,j,l,m) + alp_r*beta(i,j,k)*volom(i,j,k,l,m)
                             IG(i,j,k,l,m) = num/(deno + small)
                             dif = abs(IG(i,j,k,l,m) - Ip)/(IG(i,j,k,l,m) + small)
@@ -649,15 +690,20 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         !8th octant (i=2,nxp;j=nyp,2;k=nzp,2;l=T2+1,nt;m=P4+1,np)
-        do k=nzp,2,-1
-            do j=nyp,2,-1
-                do i=2,nxp
-                    do l=T2+1,nt
-                        do m=P4+1,np
+        !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+        !$OMP   PRIVATE(i,j,k,l,m,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(nxp,nyp,nzp,T2,P2,P3,P4,nt,np,IG,Ax,Ay,Az,alp_r,volom,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=T2+1,nt
+            do m=P4+1,np
+                do k=nzp,2,-1
+                    do j=nyp,2,-1
+                        do i=2,nxp
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i-1,j,k,l,m),IG(i,j+1,k,l,m),IG(i,j,k+1,l,m),Ip,Iw,Is,Ib)
-                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m) 
+                            num  = Ax(j,k,l,m)*Iw + Ay(i,k,l,m)*Is + Az(i,j,l,m)*Ib + alp_r*volom(i,j,k,l,m)*Sm(i,j,k,l,m)
                             deno = Ax(j,k,l,m) + Ay(i,k,l,m) + Az(i,j,l,m) + alp_r*beta(i,j,k)*volom(i,j,k,l,m)
                             IG(i,j,k,l,m) = num/(deno + small)
                             dif = abs(IG(i,j,k,l,m) - Ip)/(IG(i,j,k,l,m) + small)
@@ -667,6 +713,7 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
     end subroutine agular_loop
     !========================================================================================
     !----------------------------------------------------------
@@ -1279,12 +1326,21 @@ module radiation
         integer :: i,j,k,l,m
         double precision :: Sm(nxi,nyi,nzi,nq,8),IG(nxi,nyi,nzi,nq,8),num,deno,dif,Ip,Iw,Is,Ib,eps
         eps = -1.0d0
+        ! Paralelizacao angular (Fase 2): em cada octante (m fixo) as nq direcoes
+        ! (l) sao independentes -- cada uma so toca IG(:,:,:,l,m). Levar o laco l
+        ! para fora e paraleliza-lo e troca de ordem de loop sem dependencia
+        ! cruzada: bit-identico ao serial. A varredura espacial (k,j,i) continua
+        ! sequencial dentro de cada direcao (dependencia upwind preservada).
         !1st octant (i=2,nxp;j=2,nyp;k=2,nzp;l=1,nq;m=1)
         m = 1
-        do k=2,nzp
-            do j=2,nyp
-                do i=2,nxp
-                    do l=1,nq
+        !$OMP PARALLEL DO DEFAULT(NONE) &
+        !$OMP   PRIVATE(i,j,k,l,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(m,nxp,nyp,nzp,nq,IG,Axd,Ayd,Azd,alp_r,vol,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=1,nq
+            do k=2,nzp
+                do j=2,nyp
+                    do i=2,nxp
                         Ip = IG(i,j,k,l,m)
                         call rad_scheme(IG(i-1,j,k,l,m),IG(i,j-1,k,l,m),IG(i,j,k-1,l,m),Ip,Iw,Is,Ib)
                         num  = Axd(j,k,l)*Iw + Ayd(i,k,l)*Is + Azd(i,j,l)*Ib + alp_r*vol(i,j,k)*Sm(i,j,k,l,m)
@@ -1296,12 +1352,17 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         !2nd octant (i=nxp,2;j=2,nyp;k=2,nzp;l=1,nq;m=2)
         m = 2
-        do k=2,nzp
-            do j=2,nyp
-                do i=nxp,2,-1
-                    do l=1,nq
+        !$OMP PARALLEL DO DEFAULT(NONE) &
+        !$OMP   PRIVATE(i,j,k,l,Ip,Iw,Is,Ib,num,deno,dif) &
+        !$OMP   SHARED(m,nxp,nyp,nzp,nq,IG,Axd,Ayd,Azd,alp_r,vol,Sm,beta,small) &
+        !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+        do l=1,nq
+            do k=2,nzp
+                do j=2,nyp
+                    do i=nxp,2,-1
                         Ip = IG(i,j,k,l,m)
                         call rad_scheme(IG(i+1,j,k,l,m),IG(i,j-1,k,l,m),IG(i,j,k-1,l,m),Ip,Iw,Is,Ib)
                         num  = Axd(j,k,l)*Iw + Ayd(i,k,l)*Is + Azd(i,j,l)*Ib + alp_r*vol(i,j,k)*Sm(i,j,k,l,m)
@@ -1313,13 +1374,18 @@ module radiation
                 end do
             end do
         end do
+        !$OMP END PARALLEL DO
         if(DIMEN == 2 .or. DIMEN == 3)then
             !3rd octant (i=nxp,2;j=nyp,2;k=2,nzp;l=1,nq;m=3)
             m = 3
-            do k=2,nzp
-                do j=nyp,2,-1
-                    do i=nxp,2,-1
-                        do l=1,nq
+            !$OMP PARALLEL DO DEFAULT(NONE) &
+            !$OMP   PRIVATE(i,j,k,l,Ip,Iw,Is,Ib,num,deno,dif) &
+            !$OMP   SHARED(m,nxp,nyp,nzp,nq,IG,Axd,Ayd,Azd,alp_r,vol,Sm,beta,small) &
+            !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+            do l=1,nq
+                do k=2,nzp
+                    do j=nyp,2,-1
+                        do i=nxp,2,-1
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i+1,j,k,l,m),IG(i,j+1,k,l,m),IG(i,j,k-1,l,m),Ip,Iw,Is,Ib)
                             num  = Axd(j,k,l)*Iw + Ayd(i,k,l)*Is + Azd(i,j,l)*Ib + alp_r*vol(i,j,k)*Sm(i,j,k,l,m)
@@ -1331,12 +1397,17 @@ module radiation
                     end do
                 end do
             end do
+            !$OMP END PARALLEL DO
             !4th octant (i=2,nxp;j=nyp,2;k=2,nzp;l=1,nq;m=4)
             m = 4
-            do k=2,nzp
-                do j=nyp,2,-1
-                    do i=2,nxp
-                        do l=1,nq
+            !$OMP PARALLEL DO DEFAULT(NONE) &
+            !$OMP   PRIVATE(i,j,k,l,Ip,Iw,Is,Ib,num,deno,dif) &
+            !$OMP   SHARED(m,nxp,nyp,nzp,nq,IG,Axd,Ayd,Azd,alp_r,vol,Sm,beta,small) &
+            !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+            do l=1,nq
+                do k=2,nzp
+                    do j=nyp,2,-1
+                        do i=2,nxp
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i-1,j,k,l,m),IG(i,j+1,k,l,m),IG(i,j,k-1,l,m),Ip,Iw,Is,Ib)
                             num  = Axd(j,k,l)*Iw + Ayd(i,k,l)*Is + Azd(i,j,l)*Ib + alp_r*vol(i,j,k)*Sm(i,j,k,l,m)
@@ -1348,14 +1419,19 @@ module radiation
                     end do
                 end do
             end do
+            !$OMP END PARALLEL DO
         end if
         if(DIMEN == 3)then
             !5th octant (i=2,nxp;j=2,nyp;k=nzp,2;l=1,nq;m=5)
             m = 5
-            do k=nzp,2,-1
-                do j=2,nyp
-                    do i=2,nxp
-                        do l=1,nq
+            !$OMP PARALLEL DO DEFAULT(NONE) &
+            !$OMP   PRIVATE(i,j,k,l,Ip,Iw,Is,Ib,num,deno,dif) &
+            !$OMP   SHARED(m,nxp,nyp,nzp,nq,IG,Axd,Ayd,Azd,alp_r,vol,Sm,beta,small) &
+            !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+            do l=1,nq
+                do k=nzp,2,-1
+                    do j=2,nyp
+                        do i=2,nxp
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i-1,j,k,l,m),IG(i,j-1,k,l,m),IG(i,j,k+1,l,m),Ip,Iw,Is,Ib)
                             num  = Axd(j,k,l)*Iw + Ayd(i,k,l)*Is + Azd(i,j,l)*Ib + alp_r*vol(i,j,k)*Sm(i,j,k,l,m)
@@ -1367,12 +1443,17 @@ module radiation
                     end do
                 end do
             end do
+            !$OMP END PARALLEL DO
             !6th octant (i=nxp,2;j=2,nyp;k=nzp,2;l=1,nq;m=6)
             m = 6
-            do k=nzp,2,-1
-                do j=2,nyp
-                    do i=nxp,2,-1
-                        do l=1,nq
+            !$OMP PARALLEL DO DEFAULT(NONE) &
+            !$OMP   PRIVATE(i,j,k,l,Ip,Iw,Is,Ib,num,deno,dif) &
+            !$OMP   SHARED(m,nxp,nyp,nzp,nq,IG,Axd,Ayd,Azd,alp_r,vol,Sm,beta,small) &
+            !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+            do l=1,nq
+                do k=nzp,2,-1
+                    do j=2,nyp
+                        do i=nxp,2,-1
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i+1,j,k,l,m),IG(i,j-1,k,l,m),IG(i,j,k+1,l,m),Ip,Iw,Is,Ib)
                             num  = Axd(j,k,l)*Iw + Ayd(i,k,l)*Is + Azd(i,j,l)*Ib + alp_r*vol(i,j,k)*Sm(i,j,k,l,m)
@@ -1384,12 +1465,17 @@ module radiation
                     end do
                 end do
             end do
+            !$OMP END PARALLEL DO
             !7th octant (i=nxp,2;j=nyp,2;k=nzp,2;l=1,nq;m=7)
             m = 7
-            do k=nzp,2,-1
-                do j=nyp,2,-1
-                    do i=nxp,2,-1
-                        do l=1,nq
+            !$OMP PARALLEL DO DEFAULT(NONE) &
+            !$OMP   PRIVATE(i,j,k,l,Ip,Iw,Is,Ib,num,deno,dif) &
+            !$OMP   SHARED(m,nxp,nyp,nzp,nq,IG,Axd,Ayd,Azd,alp_r,vol,Sm,beta,small) &
+            !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+            do l=1,nq
+                do k=nzp,2,-1
+                    do j=nyp,2,-1
+                        do i=nxp,2,-1
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i+1,j,k,l,m),IG(i,j+1,k,l,m),IG(i,j,k+1,l,m),Ip,Iw,Is,Ib)
                             num  = Axd(j,k,l)*Iw + Ayd(i,k,l)*Is + Azd(i,j,l)*Ib + alp_r*vol(i,j,k)*Sm(i,j,k,l,m)
@@ -1401,12 +1487,17 @@ module radiation
                     end do
                 end do
             end do
+            !$OMP END PARALLEL DO
             !8th octant (i=2,nxp;j=nyp,2;k=nzp,2;l=1,nq;m=8)
             m = 8
-            do k=nzp,2,-1
-                do j=nyp,2,-1
-                    do i=2,nxp
-                        do l=1,nq
+            !$OMP PARALLEL DO DEFAULT(NONE) &
+            !$OMP   PRIVATE(i,j,k,l,Ip,Iw,Is,Ib,num,deno,dif) &
+            !$OMP   SHARED(m,nxp,nyp,nzp,nq,IG,Axd,Ayd,Azd,alp_r,vol,Sm,beta,small) &
+            !$OMP   REDUCTION(max:eps) SCHEDULE(STATIC)
+            do l=1,nq
+                do k=nzp,2,-1
+                    do j=nyp,2,-1
+                        do i=2,nxp
                             Ip = IG(i,j,k,l,m)
                             call rad_scheme(IG(i-1,j,k,l,m),IG(i,j+1,k,l,m),IG(i,j,k+1,l,m),Ip,Iw,Is,Ib)
                             num  = Axd(j,k,l)*Iw + Ayd(i,k,l)*Is + Azd(i,j,l)*Ib + alp_r*vol(i,j,k)*Sm(i,j,k,l,m)
@@ -1418,6 +1509,7 @@ module radiation
                     end do
                 end do
             end do
+            !$OMP END PARALLEL DO
         end if
     end subroutine orthogonal_loop
     !========================================================================================

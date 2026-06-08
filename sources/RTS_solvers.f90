@@ -130,27 +130,45 @@ module solvers
     ! ETANORM - Residue assessment
     !----------------------------------------------------------
     subroutine SOR(phi,Ab,At,Aw,Ae,As,An,Ap,RHS,nitac,eps,sc,omega)
-        integer          :: i,j,k,IM,IP,JM,JP,KM,KP,nitac
+        integer          :: i,j,k,IM,IP,JM,JP,KM,KP,nitac,icolor
         double precision :: Aw(nxi,nyi,nzi),As(nxi,nyi,nzi),Ab(nxi,nyi,nzi),  &
                             Ae(nxi,nyi,nzi),An(nxi,nyi,nzi),At(nxi,nyi,nzi),  &
                             Ap(nxi,nyi,nzi),phi(nxi,nyi,nzi),RHS(nxi,nyi,nzi),&
                             phi_old(nxi,nyi,nzi),phip,eps,sc,omega
-        do nitac = 1,ITMAX 
+        ! Ordenacao red-black (Fase 2): no esquema de 7 pontos, uma celula so se
+        ! acopla a vizinhos de paridade (i+j+k) oposta. Varrendo primeiro as
+        ! celulas "pretas" (icolor=0) e depois as "vermelhas" (icolor=1), cada
+        ! cor le apenas celulas da outra cor -> a varredura de cada cor e
+        ! embaracosamente paralela, mantendo o carater Gauss-Seidel (cada cor usa
+        ! os valores ja atualizados da cor anterior).
+        ! NOTA: red-black GS converge para a MESMA solucao do sistema linear que a
+        ! ordenacao lexicografica original, mas os iterados intermediarios diferem
+        ! (logo nitac pode mudar). So o metodo P1 usa SOR; nenhum caso de regressao
+        ! atual usa P1, portanto esta mudanca ainda nao e coberta pela suite.
+        do nitac = 1,ITMAX
             phi_old = phi
-            do k = 2,nzp
-                KM = k - 1 + int(2/k)
-                KP = k + 1 - int(k/nzp)
-                do j = 2,nyp
-                    JM = j - 1 + int(2/j)
-                    JP = j + 1 - int(j/nyp)
-                    do i = 2,nxp
-                        IM = I - 1 + int(2/i)
-                        IP = I + 1 - int(i/nxp)
-                        phip = As(i,j,k)*phi(i,JM,k) + Aw(i,j,k)*phi(IM,j,k) + Ab(i,j,k)*phi(i,j,KM) + &
-                        An(i,j,k)*phi(i,JP,k) + Ae(i,j,k)*phi(IP,j,k) + At(i,j,k)*phi(i,j,KP) - RHS(i,j,k)
-                        phi(i,j,k) = phip*(omega/Ap(i,j,k)) + (1.0d0 - omega)*phi(i,j,k)
+            do icolor = 0,1
+                !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) &
+                !$OMP   PRIVATE(i,j,k,IM,IP,JM,JP,KM,KP,phip) &
+                !$OMP   SHARED(icolor,nxp,nyp,nzp,phi,As,Aw,Ab,An,Ae,At,Ap,RHS,omega) &
+                !$OMP   SCHEDULE(STATIC)
+                do k = 2,nzp
+                    do j = 2,nyp
+                        do i = 2,nxp
+                            if (mod(i+j+k,2) /= icolor) cycle
+                            KM = k - 1 + int(2/k)
+                            KP = k + 1 - int(k/nzp)
+                            JM = j - 1 + int(2/j)
+                            JP = j + 1 - int(j/nyp)
+                            IM = I - 1 + int(2/i)
+                            IP = I + 1 - int(i/nxp)
+                            phip = As(i,j,k)*phi(i,JM,k) + Aw(i,j,k)*phi(IM,j,k) + Ab(i,j,k)*phi(i,j,KM) + &
+                            An(i,j,k)*phi(i,JP,k) + Ae(i,j,k)*phi(IP,j,k) + At(i,j,k)*phi(i,j,KP) - RHS(i,j,k)
+                            phi(i,j,k) = phip*(omega/Ap(i,j,k)) + (1.0d0 - omega)*phi(i,j,k)
+                        end do
                     end do
                 end do
+                !$OMP END PARALLEL DO
             end do
             eps = ETANORM(phi_old,phi)
             if (eps < sc) exit
