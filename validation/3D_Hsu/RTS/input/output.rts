@@ -30,6 +30,9 @@
 .false.   !Thermal conductivity      ID 8
 .false.   !Radiation emissivities    ID 9
 .true.    !Q_radw (only on csv)      ID 10
+.false.   !Pressure                  ID 11
+.false.   !X_CO2                     ID 12
+.false.   !X_H2O                     ID 13
 !===============================================================
 !                  Walls Custom Variable Save
 !===============================================================
